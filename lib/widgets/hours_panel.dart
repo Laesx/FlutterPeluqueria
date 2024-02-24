@@ -49,7 +49,7 @@ class _HoursPanelState extends State<HoursPanel> {
           spacing: 8,
           runSpacing: 16,
           children: [
-            for (int i = widget.startTime; i <= widget.endTime; i++)
+            for (int i = widget.startTime; i <= widget.endTime; i++) ...[
               TimeButton(
                 enabledTimes: widget.enabledTimes,
                 label: '${i.toString().padLeft(2, '0')}:00',
@@ -69,6 +69,28 @@ class _HoursPanelState extends State<HoursPanel> {
                   widget.onTimePressed(timeSelected);
                 },
               ),
+              TimeButton(
+                enabledTimes: widget.enabledTimes,
+                label: '${i.toString().padLeft(2, '0')}:30',
+                // Hay que cambiar algo por aquí para que pueda manejar los minutos
+                // O al menos que sepa que es media hora
+                value: i,
+                timeSelected: lastSelection,
+                singleSelection: singleSelection,
+                onPressed: (timeSelected) {
+                  setState(() {
+                    if (singleSelection) {
+                      if (lastSelection == timeSelected) {
+                        lastSelection = null;
+                      } else {
+                        lastSelection = timeSelected;
+                      }
+                    }
+                  });
+                  widget.onTimePressed(timeSelected);
+                },
+              ),
+            ],
           ],
         ),
       ],
