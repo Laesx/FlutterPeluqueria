@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import 'package:flutter/material.dart';
+import 'package:flutter_peluqueria/screen/test_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'pages/basics_example.dart';
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: StartPage(),
+      home: TestScreen(),
     );
   }
 }
