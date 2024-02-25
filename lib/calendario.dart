@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-//Hay que importar el paquete table_calendar en el archivo pubspec.yaml
-
 class OpeningHoursCalendarScreen extends StatefulWidget {
   @override
   _OpeningHoursCalendarScreenState createState() =>
@@ -84,7 +82,6 @@ class _OpeningHoursCalendarScreenState
           OpeningHours(
             openingHours: _openingHours,
             onSaveChanges: _saveOpeningHoursChanges,
-            showOpeningHoursDialog: _showOpeningHoursDialog,
           ),
         ],
       ),
@@ -92,7 +89,7 @@ class _OpeningHoursCalendarScreenState
   }
 }
 
-class OpeningCalendar extends StatelessWidget {
+class OpeningCalendar extends StatefulWidget {
   final Map<DateTime, List<String>> openingCalendar;
   final Function(Map<DateTime, List<String>> calendar) onSaveChanges;
 
@@ -101,6 +98,13 @@ class OpeningCalendar extends StatelessWidget {
     required this.openingCalendar,
     required this.onSaveChanges,
   }) : super(key: key);
+
+  @override
+  _OpeningCalendarState createState() => _OpeningCalendarState();
+}
+
+class _OpeningCalendarState extends State<OpeningCalendar> {
+  CalendarFormat _calendarFormat = CalendarFormat.month;
 
   @override
   Widget build(BuildContext context) {
@@ -121,24 +125,63 @@ class OpeningCalendar extends StatelessWidget {
             firstDay: DateTime.utc(2020, 1, 1),
             lastDay: DateTime.utc(2030, 12, 31),
             focusedDay: DateTime.now(),
-            calendarFormat: CalendarFormat.week,
+            calendarFormat: _calendarFormat,
             weekendDays: [DateTime.saturday, DateTime.sunday],
             daysOfWeekStyle: DaysOfWeekStyle(
               weekendStyle: TextStyle(color: Colors.red),
             ),
+            calendarStyle: CalendarStyle(
+              weekendTextStyle: TextStyle(color: Colors.red),
+            ),
             selectedDayPredicate: (day) {
-              return openingCalendar.containsKey(day);
+              return widget.openingCalendar.containsKey(day);
             },
+            calendarBuilders: CalendarBuilders(
+              defaultBuilder: (context, day, _) {
+                if (widget.openingCalendar.containsKey(day) &&
+                    widget.openingCalendar[day]!.contains('Closed')) {
+                  return Container(
+                    margin: const EdgeInsets.all(4.0),
+                    padding: const EdgeInsets.only(top: 5.0),
+                    alignment: Alignment.center,
+                    child: Text(
+                      day.day.toString(),
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  );
+                }
+              },
+            ),
             onDaySelected: (selectedDay, focusedDay) {
-              // Implementa la lógica para cambiar el estado del día seleccionado (abierto/cerrado)
-              final isOpen = openingCalendar.containsKey(selectedDay);
-              final updatedCalendar = {...openingCalendar};
-              if (isOpen) {
-                updatedCalendar.remove(selectedDay);
-              } else {
-                updatedCalendar[selectedDay] = [];
-              }
-              onSaveChanges(updatedCalendar);
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Select Option'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          final updatedCalendar = {...widget.openingCalendar};
+                          updatedCalendar.remove(selectedDay);
+                          widget.onSaveChanges(updatedCalendar);
+                          Navigator.pop(context);
+                        },
+                        child: Text('Open'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          final updatedCalendar = {...widget.openingCalendar};
+                          updatedCalendar[selectedDay] = ['Closed'];
+                          widget.onSaveChanges(updatedCalendar);
+                          Navigator.pop(context);
+                        },
+                        child: Text('Close'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             },
           ),
         ],
@@ -147,17 +190,33 @@ class OpeningCalendar extends StatelessWidget {
   }
 }
 
-class OpeningHours extends StatelessWidget {
+class OpeningHours extends StatefulWidget {
   final Map<String, List<String>> openingHours;
   final Function(Map<String, List<String>> hours) onSaveChanges;
-  final VoidCallback showOpeningHoursDialog;
 
   const OpeningHours({
     Key? key,
     required this.openingHours,
     required this.onSaveChanges,
-    required this.showOpeningHoursDialog,
   }) : super(key: key);
+
+  @override
+  _OpeningHoursState createState() => _OpeningHoursState();
+}
+
+class _OpeningHoursState extends State<OpeningHours> {
+  Future<void> _selectTime(BuildContext context, String type) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        widget.openingHours[type] = [picked.format(context)];
+      });
+      widget.onSaveChanges(widget.openingHours);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -174,27 +233,25 @@ class OpeningHours extends StatelessWidget {
             ),
           ),
           SizedBox(height: 10),
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: openingHours.length,
-            itemBuilder: (context, index) {
-              final day = openingHours.keys.elementAt(index);
-              final hours = openingHours[day]!;
-              final isOpen = hours.isNotEmpty;
-              return ListTile(
-                title: Row(
-                  children: [
-                    Text('$day: '),
-                    if (isOpen)
-                      Text(hours.join(', '))
-                    else
-                      Text('Cerrado', style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-                onTap: showOpeningHoursDialog,
-              );
-            },
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  _selectTime(context, 'opening');
+                },
+                child: Text('Asignar Hora de Apertura'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _selectTime(context, 'closing');
+                },
+                child: Text('Asignar Hora de Cierre'),
+              ),
+            ],
           ),
+          Text('Opening Hour: ${widget.openingHours['opening']}'),
+          Text('Closing Hour: ${widget.openingHours['closing']}'),
         ],
       ),
     );
