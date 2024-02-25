@@ -84,6 +84,13 @@ class _StartPageState extends State<StartPage> {
               ),
             ),
             const SizedBox(height: 20.0),
+            ElevatedButton(
+              child: Text('Peluqueros'),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => TableComplexExample()),
+              ),
+            ),
           ],
         ),
       ),
