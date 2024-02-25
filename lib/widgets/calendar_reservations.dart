@@ -118,6 +118,7 @@ class _CalendarReservationsState extends State<CalendarReservations> {
           },
         ),
         const SizedBox(height: 8.0),
+        // ESTO DE ABAJO ES PARA EL QUE TENGA QUE HACER LA SCREEN DE RESERVAS
         /*
         Expanded(
           child: ValueListenableBuilder<List<Event>>(

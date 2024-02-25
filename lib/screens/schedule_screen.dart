@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_peluqueria/widgets/calendar_reservations_test.dart';
 import 'package:flutter_peluqueria/widgets/widgets.dart';
 
 class ScheduleScreen extends StatelessWidget {
@@ -7,10 +8,9 @@ class ScheduleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('TestScreen'),
-      ),
-      body: CalendarReservations(),
-    );
+        appBar: AppBar(
+          title: Text('TestScreen'),
+        ),
+        body: CalendarReservationsTest());
   }
 }
