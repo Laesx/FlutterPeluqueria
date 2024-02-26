@@ -39,6 +39,30 @@ class UsuariosServices extends ChangeNotifier {
     //print(this.producto[1].nombre);
   }
 
+  // Devuelve una lista de usuarios que son peluqueros
+  Future<List<Usuario>> loadPeluqueros() async {
+    isLoading = true;
+    notifyListeners();
+
+    final url = Uri.https(_baseURL, 'usuarios.json');
+    final resp = await http.get(url);
+
+    final Map<String, dynamic> usuariosMap = json.decode(resp.body);
+
+    usuariosMap.forEach((key, value) {
+      final tempUser = Usuario.fromMap(value);
+      if (tempUser.rol == 'peluquero') {
+        tempUser.id = key;
+        usuarios.add(tempUser);
+      }
+    });
+
+    isLoading = false;
+    notifyListeners();
+    //print(usuarios.toString());
+    return usuarios;
+  }
+
   // TODO Falta implementar
   Future saveOrCreateUsuario(Usuario usuario) async {
     isSaving = true;
