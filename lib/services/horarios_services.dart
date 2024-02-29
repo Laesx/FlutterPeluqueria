@@ -1,0 +1,112 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter_peluqueria/models/models.dart';
+import 'package:http/http.dart' as http;
+
+class HorariosServices extends ChangeNotifier {
+  final String _baseURL =
+      'fl-peluqueria-27d72-default-rtdb.europe-west1.firebasedatabase.app';
+  final List<HorarioPeluquero> horarios = [];
+  final List<Horario> horarioPelu = [];
+
+  bool isLoading = true;
+  bool isSaving = false;
+
+  HorariosServices() {
+    loadHorarios();
+    loadHorarioPelu(); // Esto lo mismo da error?
+  }
+
+  // TODO Falta probar
+  // Este metodo devuelve el horario de la peluqueria en si
+  Future<List<Horario>> loadHorarioPelu() async {
+    isLoading = true;
+    notifyListeners();
+
+    final url = Uri.https(_baseURL, 'horario_peluqueria.json');
+    final resp = await http.get(url);
+
+    final Map<String, dynamic> horarioPeluqueria = json.decode(resp.body);
+    // Solo debería haber un horario pero se queja si no lo hago una lista...
+    horarioPeluqueria.forEach((key, value) {
+      final tempUser = Horario.fromMap(value);
+      horarioPelu.add(tempUser);
+    });
+
+    isLoading = false;
+    notifyListeners();
+
+    return horarioPelu;
+  }
+
+  // TODO Falta Probar
+  // Este metodo devuelve los horarios de los peluqueros
+  Future<List<HorarioPeluquero>> loadHorarios() async {
+    isLoading = true;
+    notifyListeners();
+
+    final url = Uri.https(_baseURL, 'horarios.json');
+    final resp = await http.get(url);
+
+    final Map<String, dynamic> horariosMap = json.decode(resp.body);
+
+    horariosMap.forEach((key, value) {
+      final tempHorario = HorarioPeluquero.fromMap(value);
+      tempHorario.id = key;
+      horarios.add(tempHorario);
+    });
+
+    isLoading = false;
+    notifyListeners();
+
+    return horarios;
+    //print(this.producto[1].nombre);
+  }
+
+  // TODO probar
+  Future saveOrCreateHorarioPeluquero(HorarioPeluquero horarioPeluquero) async {
+    isSaving = true;
+    notifyListeners();
+
+    //await this.updateProducto(producto);
+    if (horarioPeluquero.id == null) {
+      // Crear la entrada
+      await createHorario(horarioPeluquero);
+    } else {
+      // Update de la entrada
+      await updateHorario(horarioPeluquero);
+    }
+
+    isSaving = false;
+    notifyListeners();
+  }
+
+  // TODO Falta probar
+  Future<String> updateHorario(HorarioPeluquero horarioPeluquero) async {
+    final url = Uri.https(_baseURL, 'horarios/${horarioPeluquero.id}.json');
+    final resp = await http.put(url, body: horarioPeluquero.toJson());
+    final decodedData = resp.body;
+
+    //TODO Print para prueba, esto hay que quitarlo
+    print(decodedData);
+    final index =
+        horarios.indexWhere((element) => element.id == horarioPeluquero.id);
+    horarios[index] = horarioPeluquero;
+
+    return horarioPeluquero.id!;
+  }
+
+  // TODO Falta probar
+  Future<String> createHorario(HorarioPeluquero horarioPeluquero) async {
+    final url = Uri.https(_baseURL, 'horarios.json');
+    final resp = await http.post(url, body: horarioPeluquero.toJson());
+    final decodedData = json.decode(resp.body);
+
+    // Esto hay que testearlo, aunque no se si lo vamos a usar siquiera
+    horarioPeluquero.id = decodedData['name'];
+
+    horarios.add(horarioPeluquero);
+
+    return horarioPeluquero.id!;
+  }
+}
