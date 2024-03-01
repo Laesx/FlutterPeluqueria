@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/models/models.dart';
 import 'package:flutter_peluqueria/services/services.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+//void main() {runApp(const MyApp());}
+
+void main() => runApp(AppState());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -33,51 +34,57 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class MyHomePage extends StatelessWidget {
+  MyHomePage({super.key, required this.title});
   final String title;
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
   final usuariosServices = UsuariosServices();
 
-  void loadPeluqueros() {
+  void loadPeluqueros() async {
     print('Cargando peluqueros');
-    Future<List<Usuario>> users = usuariosServices.loadPeluqueros();
-    users.then((List<Usuario> userList) {
-      for (var user in userList) {
-        print(user.nombre);
-      }
-      print('Peluqueros cargados');
-    });
+    List<Usuario> userList = await usuariosServices.loadPeluqueros();
+    for (var user in userList) {
+      print(user.nombre);
+    }
     print('Peluqueros cargados');
   }
 
-  void loadUsuarios() {
+  void loadUsuarios() async {
     print('Cargando usuarios');
-    Future<List<Usuario>> users = usuariosServices.loadUsuarios();
-    users.then((List<Usuario> userList) {
-      for (var user in userList) {
-        print(user.toJson());
-      }
-      print('Usuarios cargados');
-    });
+    List<Usuario> userList = await usuariosServices.loadUsuarios();
+    for (var user in userList) {
+      print(user.toJson());
+    }
+    print('Usuarios cargados');
+  }
+
+  void cargarHorarios(HorariosServices service) {
+    print('Cargando horarios');
+    List<HorarioPeluquero> horariosList = service.horarios;
+    for (var horario in horariosList) {
+      print(horario.toJson());
+    }
+    print('Horarios cargados');
   }
 
   @override
   Widget build(BuildContext context) {
+    final usuariosServices = Provider.of<UsuariosServices>(context);
+    final productosService = Provider.of<HorariosServices>(context);
+
+    if (usuariosServices.isLoading || productosService.isLoading) {
+      return const CircularProgressIndicator();
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text(title),
       ),
       body: Center(
         child: Column(
@@ -91,9 +98,28 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: loadUsuarios,
               child: const Text('Cargar usuarios'),
             ),
+            ElevatedButton(
+              onPressed: () => cargarHorarios(productosService),
+              child: const Text('Cargar horarios'),
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class AppState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthService()),
+        ChangeNotifierProvider(create: (context) => HorariosServices()),
+        ChangeNotifierProvider(create: (context) => ReservasServices()),
+        ChangeNotifierProvider(create: (context) => UsuariosServices())
+      ],
+      child: MyApp(),
     );
   }
 }

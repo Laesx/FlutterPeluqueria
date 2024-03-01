@@ -26,12 +26,11 @@ class HorariosServices extends ChangeNotifier {
     final url = Uri.https(_baseURL, 'horario_peluqueria.json');
     final resp = await http.get(url);
 
-    final Map<String, dynamic> horarioPeluqueria = json.decode(resp.body);
+    final Map<String, dynamic> horariosMap = json.decode(resp.body);
+    //final String json_contenido = json.decode(resp.body);
+    final tempHorarioPelu = Horario.fromMap(horariosMap);
     // Solo debería haber un horario pero se queja si no lo hago una lista...
-    horarioPeluqueria.forEach((key, value) {
-      final tempUser = Horario.fromMap(value);
-      horarioPelu.add(tempUser);
-    });
+    horarioPelu.add(tempHorarioPelu);
 
     isLoading = false;
     notifyListeners();
@@ -46,6 +45,7 @@ class HorariosServices extends ChangeNotifier {
     notifyListeners();
 
     final url = Uri.https(_baseURL, 'horarios.json');
+    //print(url);
     final resp = await http.get(url);
 
     final Map<String, dynamic> horariosMap = json.decode(resp.body);

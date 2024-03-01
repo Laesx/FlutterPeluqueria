@@ -1,4 +1,6 @@
 import 'dart:convert';
+//import 'package:flutter_peluqueria/models/dia.dart';
+import 'dia.dart';
 
 class Horario {
   // a lo mejor es mejor ponerlo como un map?
@@ -21,6 +23,52 @@ class Horario {
     required this.sabado,
     required this.viernes,
   });
+
+  // Default empty constructor for testing
+  Horario.empty()
+      : domingo = Dia(
+          empiezaMan: '00:00',
+          empiezaTarde: '00:00',
+          acabaMan: '00:00',
+          acabaTarde: '00:00',
+        ),
+        festivos = [],
+        jueves = Dia(
+          empiezaMan: '00:00',
+          empiezaTarde: '00:00',
+          acabaMan: '00:00',
+          acabaTarde: '00:00',
+        ),
+        lunes = Dia(
+          empiezaMan: '00:00',
+          empiezaTarde: '00:00',
+          acabaMan: '00:00',
+          acabaTarde: '00:00',
+        ),
+        martes = Dia(
+          empiezaMan: '00:00',
+          empiezaTarde: '00:00',
+          acabaMan: '00:00',
+          acabaTarde: '00:00',
+        ),
+        miercoles = Dia(
+          empiezaMan: '00:00',
+          empiezaTarde: '00:00',
+          acabaMan: '00:00',
+          acabaTarde: '00:00',
+        ),
+        sabado = Dia(
+          empiezaMan: '00:00',
+          empiezaTarde: '00:00',
+          acabaMan: '00:00',
+          acabaTarde: '00:00',
+        ),
+        viernes = Dia(
+          empiezaMan: '00:00',
+          empiezaTarde: '00:00',
+          acabaMan: '00:00',
+          acabaTarde: '00:00',
+        );
 
   factory Horario.fromJson(String str) => Horario.fromMap(json.decode(str));
 
@@ -48,37 +96,5 @@ class Horario {
         "miercoles": miercoles.toMap(),
         "sabado": sabado.toMap(),
         "viernes": viernes.toMap(),
-      };
-}
-
-class Dia {
-  String empiezaMan;
-  String empiezaTarde;
-  String acabaMan;
-  String acabaTarde;
-
-  Dia({
-    required this.empiezaMan,
-    required this.empiezaTarde,
-    required this.acabaMan,
-    required this.acabaTarde,
-  });
-
-  factory Dia.fromJson(String str) => Dia.fromMap(json.decode(str));
-
-  String toJson() => json.encode(toMap());
-
-  factory Dia.fromMap(Map<String, dynamic> json) => Dia(
-        empiezaMan: json["empieza_man"],
-        empiezaTarde: json["empieza_tarde"],
-        acabaMan: json["acaba_man"],
-        acabaTarde: json["acaba_tarde"],
-      );
-
-  Map<String, dynamic> toMap() => {
-        "empieza_man": empiezaMan,
-        "empieza_tarde": empiezaTarde,
-        "acaba_man": acabaMan,
-        "acaba_tarde": acabaTarde,
       };
 }

@@ -49,6 +49,22 @@ class ReservasServices extends ChangeNotifier {
     return reserva;
   }
 
+  // TODO Probar si funciona
+  Future<List<Reserva>> getReservasByDate(DateTime date) async {
+    final url = Uri.https(_baseURL, 'reservas.json');
+    final resp = await http.get(url);
+
+    final Map<String, dynamic> reservasMap = json.decode(resp.body);
+
+    reservasMap.forEach((key, value) {
+      final tempReserva = Reserva.fromMap(value);
+      tempReserva.usuario = key;
+      reservas.add(tempReserva);
+    });
+
+    return reservas;
+  }
+
   // Se supone que estos 3 no hay que implementarlo según dice el profesor?
   /*
   Future<void> createReserva(Reserva reserva) async {
