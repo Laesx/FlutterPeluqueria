@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/models/models.dart';
 import 'package:flutter_peluqueria/services/services.dart';
-import 'package:flutter_peluqueria/widgets/botones.dart';
 import 'package:flutter_peluqueria/widgets/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../utils.dart';
 import 'package:provider/provider.dart';
 
-class CalendarReservationsTest extends StatefulWidget {
-  const CalendarReservationsTest({super.key});
+class CalendarioPeluquero extends StatefulWidget {
+  const CalendarioPeluquero({super.key});
 
   @override
-  State<CalendarReservationsTest> createState() =>
-      _CalendarReservationsTestState();
+  State<CalendarioPeluquero> createState() => _CalendarioPeluqueroState();
 }
 
-class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
+class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
   late ValueNotifier<List<String>> _selectedSchedule;
   final CalendarFormat _calendarFormat = CalendarFormat.week;
   final RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.disabled;
@@ -47,16 +45,16 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
     super.dispose();
   }
 
-  Horario _getScheduleForDay(DateTime day) {
+  // TODO Por implementar
+  // La idea es que luego el _getHorarioPeluString
+  // llame a esta funcion y devuelva botones u otra cosa que no sea solo texto
+  Horario _getReservasPorDia(DateTime day) {
     Horario horario = Horario.empty();
 
     if (reservasServices.isLoading || horariosServices.isLoading) {
       // Return a default Horario object or handle it accordingly
       return Horario.empty(); // Assuming Horario has a default constructor
     }
-
-    // En caso de que no se encuentre de la otra forma.
-    //horario = horariosServices.horarios.first.horario;
 
     //reservasServices.getReservasByDate(day);
 
@@ -69,49 +67,14 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
     return horario;
   }
 
-  Horario _getHorarioPelu() {
-    Horario horario = Horario.empty();
-
-    if (reservasServices.isLoading || horariosServices.isLoading) {
-      // Return a default Horario object or handle it accordingly
-      return Horario.empty(); // Assuming Horario has a default constructor
-    }
-
-    // En caso de que no se encuentre de la otra forma.
-    //horario = horariosServices.horarios.first.horario;
-
-    horariosServices.horarioPelu.forEach((horarioPelu) {
-      horario = horarioPelu;
-    });
-
-    return horario;
-  }
-
-  Map<String, dynamic> _getHorarioPeluqueria() {
-    Map<String, dynamic> horario = {};
-
-    if (reservasServices.isLoading || horariosServices.isLoading) {
-      // Return a default Horario object or handle it accordingly
-      return horario; // Assuming Horario has a default constructor
-    }
-
-    // En caso de que no se encuentre de la otra forma.
-    //horario = horariosServices.horarios.first.horario;
-
-    horariosServices.horarioPelu.forEach((horarioPelu) {
-      horario = horarioPelu.toMap();
-    });
-
-    print(horario.toString());
-
-    return horario;
-  }
-
+  // Esta función devuelve una lista con todas las horas que está abierta
+  // la peluqueria en un día concreto
   List<String> _getHorarioPeluString(DateTime day) {
     List<String> horario = [];
 
     Map<String, dynamic> horarioMapa = {};
 
+    // Esto creo que no hace falta
     if (reservasServices.isLoading || horariosServices.isLoading) {
       // Return a default Horario object or handle it accordingly
       return horario; // Assuming Horario has a default constructor
@@ -140,6 +103,14 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
   List<String> getTimes(String startTime, String endTime) {
     List<String> times = [];
 
+    // Comprobamos que no este vacio o que este cerrado en algun tramo
+    if (startTime.isEmpty ||
+        endTime.isEmpty ||
+        startTime == 'cerrado' ||
+        endTime == 'cerrado') {
+      return times;
+    }
+
     var startHour = int.parse(startTime.split(':')[0]);
     var startMinute = int.parse(startTime.split(':')[1]);
 
@@ -160,27 +131,8 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
     return times;
   }
 
-  Dia _horarioDia(Horario horario, DateTime day) {
-    switch (day.weekday) {
-      case DateTime.monday:
-        return horario.lunes;
-      case DateTime.tuesday:
-        return horario.martes;
-      case DateTime.wednesday:
-        return horario.miercoles;
-      case DateTime.thursday:
-        return horario.jueves;
-      case DateTime.friday:
-        return horario.viernes;
-      case DateTime.saturday:
-        return horario.sabado;
-      case DateTime.sunday:
-        return horario.domingo;
-      default:
-        return Dia.empty();
-    }
-  }
-
+  // Devuelve el día de la semana en string, al pasarle un DateTime del día
+  // Esto a lo mejor tendría que llevarlo a el modelo en si como una funcion estatica?
   String diaSemana(DateTime dia) {
     switch (dia.weekday) {
       case DateTime.monday:
@@ -202,6 +154,7 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
     }
   }
 
+  // Esta función es lo que ejecutará el calendario al seleccionar un día
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
@@ -265,7 +218,7 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: ListTile(
-                      onTap: () => _getHorarioPeluqueria(),
+                      onTap: () => print(dia[index].toString()),
                       // Esto está muy mal hecho
                       title: Text(dia[index].toString()),
                     ),
