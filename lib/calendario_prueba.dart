@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '/screens/calendario_screen.dart';
+import '/screens/hours_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,6 +17,7 @@ class MyApp extends StatelessWidget {
       home: MyHomePage(),
       routes: {
         '/screens/calendario_screen': (context) => OpeningHoursCalendarScreen(),
+        '/screens/hours_screen': (context) => OpeningHoursManager(),
       },
     );
   }
@@ -28,13 +30,22 @@ class MyHomePage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Mi Aplicación de Calendario'),
       ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/screens/calendario_screen');
-          },
-          child: Text('Ver Calendario'),
-        ),
+      body: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/screens/calendario_screen');
+            },
+            child: Text('Ver Calendario'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/screens/hours_screen');
+            },
+            child: Text('Ver Horarios de Apertura'),
+          ),
+        ],
       ),
     );
   }

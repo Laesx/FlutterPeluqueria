@@ -101,8 +101,10 @@ class _OpeningCalendarState extends State<OpeningCalendar> {
           ),
           SizedBox(height: 10),
           TableCalendar(
-            firstDay: DateTime.utc(2020, 1, 1),
-            lastDay: DateTime.utc(2030, 12, 31),
+            firstDay:
+                DateTime.utc(DateTime.now().year, DateTime.now().month, 1),
+            lastDay:
+                DateTime.utc(DateTime.now().year, DateTime.now().month + 2, 31),
             focusedDay: DateTime.now(),
             calendarFormat: _calendarFormat,
             onFormatChanged: (format) {
@@ -184,13 +186,11 @@ class _OpeningCalendarState extends State<OpeningCalendar> {
 }
 
 class OpeningHours extends StatefulWidget {
-  final Map<String, List<String>> openingHours;
-  final Function(Map<String, List<String>> hours) onSaveChanges;
+  final Map<String, List<String>> openingHours = {};
+  final Function(Map<String, List<String>> hours) onSaveChanges = (hours) => {};
 
-  const OpeningHours({
+  OpeningHours({
     Key? key,
-    required this.openingHours,
-    required this.onSaveChanges,
   }) : super(key: key);
 
   @override
