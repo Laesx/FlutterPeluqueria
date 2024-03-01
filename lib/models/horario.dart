@@ -74,7 +74,7 @@ class Dia {
         acabaMan: json["acaba_man"],
         acabaTarde: json["acaba_tarde"],
       );
-
+  //Esto es para convertirlo a un map los datos que se van a guardar en la base de datos
   Map<String, dynamic> toMap() => {
         "empieza_man": empiezaMan,
         "empieza_tarde": empiezaTarde,

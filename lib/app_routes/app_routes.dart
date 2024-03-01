@@ -9,7 +9,7 @@ class AppRoutes {
   static Map<String, Widget Function(BuildContext)> getAppRoutes() {
     return {
       'home': (context) => const HomeScreen(),
-      'schedule': (context) => const ScheduleScreen(),
+      //'schedule': (context) => const ScheduleScreen(),
       'gestion': (context) => GestionPeluquerosScreen(),
     };
   }

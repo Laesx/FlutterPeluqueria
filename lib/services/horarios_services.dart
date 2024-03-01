@@ -39,6 +39,24 @@ class HorariosServices extends ChangeNotifier {
     return horarioPelu;
   }
 
+  Future<void> saveHorarioPelu(Horario horario) async {
+    notifyListeners();
+
+    final url = Uri.https(_baseURL, 'horario_peluqueria.json');
+
+    final response = await http.put(
+      url,
+      body: horario.toJson(), // Convert the Horario to a JSON string
+      headers: {"Content-Type": "application/json"},
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Failed to save horario');
+    }
+
+    notifyListeners();
+  }
+
   // TODO Falta Probar
   // Este metodo devuelve los horarios de los peluqueros
   Future<List<HorarioPeluquero>> loadHorarios() async {
