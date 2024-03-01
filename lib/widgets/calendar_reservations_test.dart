@@ -3,7 +3,7 @@ import 'package:flutter_peluqueria/models/models.dart';
 import 'package:flutter_peluqueria/widgets/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../utils.dart';
-
+/*
 class CalendarReservationsTest extends StatefulWidget {
   const CalendarReservationsTest({super.key});
 
@@ -128,3 +128,4 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
     );
   }
 }
+*/

@@ -12,81 +12,16 @@ class OpeningHoursCalendarScreen extends StatefulWidget {
 
 class _OpeningHoursCalendarScreenState
     extends State<OpeningHoursCalendarScreen> {
-  late Map<DateTime, List<String>> _openingCalendar;
-  late Map<String, List<String>> _openingHours;
+  // Create instances of OpeningCalendar and OpeningHours
+  late OpeningCalendar openingCalendar;
+  late OpeningHours openingHours;
 
   @override
   void initState() {
     super.initState();
-    _initOpeningCalendar();
-    _initOpeningHours();
-  }
 
-  // Inicializa el calendario de apertura con días abiertos por defecto
-  void _initOpeningCalendar() {
-    _openingCalendar = {};
-    // Ejemplo: Todos los días de la semana están abiertos por defecto
-    final now = DateTime.now();
-    for (int i = 0; i < 7; i++) {
-      final date = now.add(Duration(days: i));
-      _openingCalendar[date] = [];
-    }
-  }
-
-  // Inicializa el horario de apertura predeterminado
-  void _initOpeningHours() {
-    _openingHours = {
-      'Lunes': ['9:00 - 13:30', '16:00 - 21:00'],
-      'Martes': ['9:00 - 13:30', '16:00 - 21:00'],
-      'Miércoles': ['9:00 - 13:30', '16:00 - 21:00'],
-      'Jueves': ['9:00 - 13:30', '16:00 - 21:00'],
-      'Viernes': ['9:00 - 15:00'],
-      'Sábado': [],
-      'Domingo': [],
-    };
-  }
-
-  // Método para guardar los cambios en el calendario de apertura
-  void _saveOpeningCalendarChanges(Map<DateTime, List<String>> calendar) {
-    setState(() {
-      _openingCalendar = calendar;
-    });
-    // Aquí puedes implementar la lógica para guardar los cambios en el calendario de apertura
-  }
-
-  // Método para guardar los cambios en el horario de apertura
-  void _saveOpeningHoursChanges(Map<String, List<String>> hours) {
-    setState(() {
-      void _saveOpeningHoursChanges(Map<String, List<String>> hours) {
-        setState(() {
-          _openingHours = hours;
-        });
-
-        // Convert the opening hours to the desired data structure
-        Map<String, dynamic> data = {"horario_peluqueria": {}};
-
-        _openingHours.forEach((day, times) {
-          data["horario_peluqueria"][day.toLowerCase()] = {
-            "abre_man": times.length > 0 ? times[0].split(" - ")[0] : "cerrado",
-            "cierra_man":
-                times.length > 0 ? times[0].split(" - ")[1] : "cerrado",
-            "abre_tarde":
-                times.length > 1 ? times[1].split(" - ")[0] : "cerrado",
-            "cierra_tarde":
-                times.length > 1 ? times[1].split(" - ")[1] : "cerrado",
-          };
-        });
-
-        // Here you can implement the logic to save the changes to the data structure
-        //saveData(data);
-      }
-    });
-    // Aquí puedes implementar la lógica para guardar los cambios en el horario de apertura
-  }
-
-  // Método para mostrar un diálogo para establecer el horario de apertura
-  void _showOpeningHoursDialog() {
-    // Aquí puedes implementar la lógica para mostrar un diálogo donde los gerentes puedan establecer el horario de apertura
+    // Initialize the OpeningCalendar and OpeningHours instances
+    openingCalendar = OpeningCalendar();
   }
 
   @override
@@ -98,17 +33,20 @@ class _OpeningHoursCalendarScreenState
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Componente de calendario de apertura
+          // Use the OpeningCalendar instance
+          openingCalendar,
 
-          OpeningCalendar(
-            openingCalendar: _openingCalendar,
-            onSaveChanges: _saveOpeningCalendarChanges,
-          ),
+          // Botón para guardar cambios
+          ElevatedButton(
+            onPressed: () {
+              // Get the closed days and opening hours from the instances
+              List<DateTime> closedDays = openingCalendar.getClosedDays();
+              print(closedDays);
+              //Map<String, List<String>> openingHoursData = openingHours.getOpeningHours();
 
-          // Componente de horario de apertura
-          OpeningHours(
-            openingHours: _openingHours,
-            onSaveChanges: _saveOpeningHoursChanges,
+              // Do something with closedDays and openingHoursData...
+            },
+            child: Text('Guardar man'),
           ),
         ],
       ),
@@ -117,17 +55,31 @@ class _OpeningHoursCalendarScreenState
 }
 
 class OpeningCalendar extends StatefulWidget {
-  final Map<DateTime, List<String>> openingCalendar;
-  final Function(Map<DateTime, List<String>> calendar) onSaveChanges;
+  final Map<DateTime, List<String>> openingCalendar = {};
+  final Function(Map<DateTime, List<String>> calendar) onSaveChanges =
+      (calendar) {};
 
-  const OpeningCalendar({
+  OpeningCalendar({
     Key? key,
-    required this.openingCalendar,
-    required this.onSaveChanges,
   }) : super(key: key);
 
   @override
   _OpeningCalendarState createState() => _OpeningCalendarState();
+
+  List<DateTime> getClosedDays() {
+    List<DateTime> closedDays = [];
+    openingCalendar.forEach((day, status) {
+      if (status.contains('Closed')) {
+        closedDays.add(day);
+      } else {
+        if (day.weekday == DateTime.saturday ||
+            day.weekday == DateTime.sunday) {
+          closedDays.add(day);
+        }
+      }
+    });
+    return closedDays;
+  }
 }
 
 class _OpeningCalendarState extends State<OpeningCalendar> {
@@ -200,18 +152,20 @@ class _OpeningCalendarState extends State<OpeningCalendar> {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            final updatedCalendar = {...widget.openingCalendar};
-                            updatedCalendar.remove(selectedDay);
-                            widget.onSaveChanges(updatedCalendar);
+                            setState(() {
+                              widget.openingCalendar.remove(selectedDay);
+                            });
+                            widget.onSaveChanges(widget.openingCalendar);
                             Navigator.pop(context);
                           },
                           child: Text('Open'),
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            final updatedCalendar = {...widget.openingCalendar};
-                            updatedCalendar[selectedDay] = ['Closed'];
-                            widget.onSaveChanges(updatedCalendar);
+                            setState(() {
+                              widget.openingCalendar[selectedDay] = ['Closed'];
+                            });
+                            widget.onSaveChanges(widget.openingCalendar);
                             Navigator.pop(context);
                           },
                           child: Text('Close'),
@@ -255,28 +209,6 @@ class _OpeningHoursState extends State<OpeningHours> {
       });
       widget.onSaveChanges(widget.openingHours);
     }
-  }
-
-  void _saveOpeningHoursChanges(Map<String, List<String>> hours) {
-    setState(() {
-      void _saveOpeningHoursChanges(Map<String, List<String>> hours) {
-        // Convert the opening hours to the desired data structure
-        Map<String, dynamic> data = {
-          "horario_peluqueria": {
-            "domingo": {
-              "abre_man": "cerrado bro",
-              "cierra_man": "cerrado",
-              "abre_tarde": "cerrado",
-              "cierra_tarde": "cerrado"
-            },
-            // rest of your data...
-          }
-        };
-        // Here you can implement the logic to save the changes to the data structure
-        //saveData(data);
-      }
-    });
-    // Aquí puedes implementar la lógica para guardar los cambios en el horario de apertura
   }
 
   @override
@@ -348,33 +280,11 @@ class _OpeningHoursState extends State<OpeningHours> {
                       'Closing Hour Afternoon: ${widget.openingHours['closing']}'),
                   SizedBox(height: 40),
                   ElevatedButton(
-                    onPressed: () {
-                      //_saveOpeningHoursChanges(widget.openingHours);
-                      saveData("Escribiendo...");
-                      // Notify that the button is pressed
-                      print('Button pressed!');
-                      // and then return to the main screen
-                    },
+                    onPressed: () {},
                     child: Text('Guardar cambios!'),
                   ),
                 ],
               ),
             )));
   }
-}
-
-void createFile() async {
-  print("Creating file");
-  final directory = await getApplicationDocumentsDirectory();
-  final file = File('${directory.path}/horarios.json');
-  if (!await file.exists()) {
-    await file.create();
-  }
-}
-
-void saveData(String textillo) async {
-  final directory = await getApplicationDocumentsDirectory();
-  final file = File('${directory.path}/horarios.json');
-
-  await file.writeAsString(textillo);
 }
