@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../models/horario.dart';
+import 'package:intl/intl.dart';
 
 extension on TimeOfDay {
   String format24Hour(BuildContext context) {
@@ -13,10 +15,18 @@ extension on TimeOfDay {
 class OpeningHoursManager extends StatefulWidget {
   @override
   _OpeningHoursManagerState createState() => _OpeningHoursManagerState();
+
+  List<Dia> getDaysOfWeek() {
+    return _OpeningHoursManagerState.getDaysOfWeek();
+  }
+
+  void printDays() {
+    _OpeningHoursManagerState.printDays();
+  }
 }
 
 class _OpeningHoursManagerState extends State<OpeningHoursManager> {
-  final List<String> _daysOfWeek = [
+  static List<String> _daysOfWeek = [
     'Lunes',
     'Martes',
     'Miércoles',
@@ -26,12 +36,12 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
     'Domingo',
   ];
 
-  Map<String, TimeOfDay> _morningOpeningTimes = {};
-  Map<String, TimeOfDay> _morningClosingTimes = {};
-  Map<String, TimeOfDay> _afternoonOpeningTimes = {};
-  Map<String, TimeOfDay> _afternoonClosingTimes = {};
-  Map<String, bool> _morningClosed = {};
-  Map<String, bool> _afternoonClosed = {};
+  static Map<String, TimeOfDay> _morningOpeningTimes = {};
+  static Map<String, TimeOfDay> _morningClosingTimes = {};
+  static Map<String, TimeOfDay> _afternoonOpeningTimes = {};
+  static Map<String, TimeOfDay> _afternoonClosingTimes = {};
+  static Map<String, bool> _morningClosed = {};
+  static Map<String, bool> _afternoonClosed = {};
 
   @override
   void initState() {
@@ -44,6 +54,61 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
       _morningClosed[day] = false;
       _afternoonClosed[day] = false;
     });
+  }
+
+  void printSchedule() {
+    for (String day in _daysOfWeek) {
+      print('$day:');
+      print(
+          '  Mañana: ${_morningClosed[day]! ? "cerrado" : "${_morningOpeningTimes[day]!.format24Hour(context)} - ${_morningClosingTimes[day]!.format24Hour(context)}"}');
+      print(
+          '  Tarde: ${_afternoonClosed[day]! ? "cerrado" : "${_afternoonOpeningTimes[day]!.format24Hour(context)} - ${_afternoonClosingTimes[day]!.format24Hour(context)}"}');
+    }
+  }
+
+  static formatTimeOfDay(TimeOfDay tod) {
+    final now = new DateTime.now();
+    final dt = DateTime(now.year, now.month, now.day, tod.hour, tod.minute);
+    final format = DateFormat('HH:mm'); // 24 hour format
+    return format.format(dt);
+  }
+
+  static List<Dia> getDaysOfWeek() {
+    List<Dia> daysOfWeek = [];
+    Dia? dia;
+    for (String day in _daysOfWeek) {
+      if (!_morningClosed[day]! && !_afternoonClosed[day]!) {
+        dia = Dia(
+          empiezaMan: formatTimeOfDay(_morningOpeningTimes[day]!),
+          empiezaTarde: formatTimeOfDay(_afternoonOpeningTimes[day]!),
+          acabaMan: formatTimeOfDay(_morningClosingTimes[day]!),
+          acabaTarde: formatTimeOfDay(_afternoonClosingTimes[day]!),
+        );
+      } else {
+        dia = Dia(
+          empiezaMan: "cerrado",
+          empiezaTarde: "cerrado",
+          acabaMan: "cerrado",
+          acabaTarde: "cerrado",
+        );
+      }
+
+      daysOfWeek.add(dia);
+    }
+    return daysOfWeek;
+  }
+
+  static printDays() {
+    List<Dia> daysOfWeek = getDaysOfWeek();
+    List<String> day = _daysOfWeek;
+
+    for (Dia dia in daysOfWeek) {
+      print("Dia: " + day[daysOfWeek.indexOf(dia)]);
+      print("Empieza mañana: " + dia.empiezaMan);
+      print("Acaba mañana: " + dia.acabaMan);
+      print("Empieza tarde: " + dia.empiezaTarde);
+      print("Acaba tarde: " + dia.acabaTarde);
+    }
   }
 
   Future<void> _selectTime(BuildContext context, String day, bool isMorning,
@@ -104,22 +169,22 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
                             ElevatedButton(
                               onPressed: () =>
                                   _selectTime(context, day, true, true),
-                              child: Text('Change Morning Opening Time'),
+                              child: Text('Hora apertura mañana'),
                             ),
                             ElevatedButton(
                               onPressed: () =>
                                   _selectTime(context, day, true, false),
-                              child: Text('Change Morning Closing Time'),
+                              child: Text('Hora cierre mañana'),
                             ),
                             ElevatedButton(
                               onPressed: () =>
                                   _selectTime(context, day, false, true),
-                              child: Text('Change Afternoon Opening Time'),
+                              child: Text('Hora apertura tarde'),
                             ),
                             ElevatedButton(
                               onPressed: () =>
                                   _selectTime(context, day, false, false),
-                              child: Text('Change Afternoon Closing Time'),
+                              child: Text('Hora cierre tarde'),
                             ),
                             ElevatedButton(
                               onPressed: () {
@@ -129,7 +194,7 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
                                 });
                                 Navigator.pop(context);
                               },
-                              child: Text('Closed'),
+                              child: Text('Cerrado (todo el dia)'),
                             ),
                           ],
                         ),
@@ -144,6 +209,7 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
         ElevatedButton(
           onPressed: () {
             // Add your button functionality here
+            Navigator.pop(context);
           },
           child: Text('Guardar cambios'),
         ),

@@ -3,6 +3,7 @@ import 'dart:convert';
 class Horario {
   // a lo mejor es mejor ponerlo como un map?
   Dia domingo;
+  //Festivos por defecto es una lista vacia
   List<DateTime> festivos;
   Dia jueves;
   Dia lunes;
@@ -21,6 +22,10 @@ class Horario {
     required this.sabado,
     required this.viernes,
   });
+
+  void setFestivos(List<DateTime> festivos) {
+    this.festivos = festivos;
+  }
 
   factory Horario.fromJson(String str) => Horario.fromMap(json.decode(str));
 
