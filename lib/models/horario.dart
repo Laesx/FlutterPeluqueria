@@ -5,6 +5,7 @@ import 'dia.dart';
 class Horario {
   // a lo mejor es mejor ponerlo como un map?
   Dia domingo;
+  //Festivos por defecto es una lista vacia
   List<DateTime> festivos;
   Dia jueves;
   Dia lunes;
@@ -14,14 +15,14 @@ class Horario {
   Dia viernes;
 
   Horario({
-    required this.domingo,
     required this.festivos,
-    required this.jueves,
     required this.lunes,
     required this.martes,
     required this.miercoles,
-    required this.sabado,
+    required this.jueves,
     required this.viernes,
+    required this.sabado,
+    required this.domingo,
   });
 
   // Default empty constructor for testing
@@ -75,26 +76,51 @@ class Horario {
   String toJson() => json.encode(toMap());
 
   factory Horario.fromMap(Map<String, dynamic> json) => Horario(
-        domingo: Dia.fromMap(json["domingo"]),
-        festivos:
-            List<DateTime>.from(json["festivos"].map((x) => DateTime.parse(x))),
-        jueves: Dia.fromMap(json["jueves"]),
-        lunes: Dia.fromMap(json["lunes"]),
-        martes: Dia.fromMap(json["martes"]),
-        miercoles: Dia.fromMap(json["miercoles"]),
-        sabado: Dia.fromMap(json["sabado"]),
-        viernes: Dia.fromMap(json["viernes"]),
+        domingo: json["domingo"] != null
+            ? Dia.fromMap(json["domingo"])
+            : Dia(
+                empiezaMan: '', empiezaTarde: '', acabaMan: '', acabaTarde: ''),
+        festivos: json["festivos"] != null
+            ? List<DateTime>.from(
+                json["festivos"].map((x) => DateTime.parse(x)))
+            : [],
+        jueves: json["jueves"] != null
+            ? Dia.fromMap(json["jueves"])
+            : Dia(
+                empiezaMan: '', empiezaTarde: '', acabaMan: '', acabaTarde: ''),
+        lunes: json["lunes"] != null
+            ? Dia.fromMap(json["lunes"])
+            : Dia(
+                empiezaMan: '', empiezaTarde: '', acabaMan: '', acabaTarde: ''),
+        martes: json["martes"] != null
+            ? Dia.fromMap(json["martes"])
+            : Dia(
+                empiezaMan: '', empiezaTarde: '', acabaMan: '', acabaTarde: ''),
+        miercoles: json["miercoles"] != null
+            ? Dia.fromMap(json["miercoles"])
+            : Dia(
+                empiezaMan: '', empiezaTarde: '', acabaMan: '', acabaTarde: ''),
+        sabado: json["sabado"] != null
+            ? Dia.fromMap(json["sabado"])
+            : Dia(
+                empiezaMan: '', empiezaTarde: '', acabaMan: '', acabaTarde: ''),
+        viernes: json["viernes"] != null
+            ? Dia.fromMap(json["viernes"])
+            : Dia(
+                empiezaMan: '', empiezaTarde: '', acabaMan: '', acabaTarde: ''),
       );
 
   Map<String, dynamic> toMap() => {
-        "domingo": domingo.toMap(),
-        "festivos": List<dynamic>.from(festivos.map((x) =>
-            "${x.year.toString().padLeft(4, '0')}-${x.month.toString().padLeft(2, '0')}-${x.day.toString().padLeft(2, '0')}")),
-        "jueves": jueves.toMap(),
-        "lunes": lunes.toMap(),
-        "martes": martes.toMap(),
-        "miercoles": miercoles.toMap(),
-        "sabado": sabado.toMap(),
-        "viernes": viernes.toMap(),
+        "domingo": domingo != null ? domingo.toMap() : null,
+        "festivos": festivos != null
+            ? List<dynamic>.from(festivos.map((x) =>
+                "${x.year.toString().padLeft(4, '0')}-${x.month.toString().padLeft(2, '0')}-${x.day.toString().padLeft(2, '0')}"))
+            : null,
+        "jueves": jueves != null ? jueves.toMap() : null,
+        "lunes": lunes != null ? lunes.toMap() : null,
+        "martes": martes != null ? martes.toMap() : null,
+        "miercoles": miercoles != null ? miercoles.toMap() : null,
+        "sabado": sabado != null ? sabado.toMap() : null,
+        "viernes": viernes != null ? viernes.toMap() : null,
       };
 }
