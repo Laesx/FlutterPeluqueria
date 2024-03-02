@@ -1,4 +1,3 @@
 export 'package:flutter_peluqueria/widgets/calendar_bar.dart';
-export 'package:flutter_peluqueria/widgets/hours_panel.dart';
 export 'package:flutter_peluqueria/widgets/calendar_reservations.dart';
-export 'appointment_card.dart';
+export 'package:flutter_peluqueria/widgets/calendario_peluquero.dart';
