@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 class HorariosServices extends ChangeNotifier {
   final String _baseURL =
-      'fl-peluqueria-27d72-default-rtdb.europe-west1.firebasedatabase.app';
+      'horarios-d3ffb-default-rtdb.europe-west1.firebasedatabase.app';
   final List<HorarioPeluquero> horarios = [];
   final List<Horario> horarioPelu = [];
 
@@ -17,8 +17,6 @@ class HorariosServices extends ChangeNotifier {
     loadHorarioPelu(); // Esto lo mismo da error?
   }
 
-  // TODO Falta probar
-  // Este metodo devuelve el horario de la peluqueria en si
   Future<List<Horario>> loadHorarioPelu() async {
     isLoading = true;
     notifyListeners();
@@ -27,9 +25,9 @@ class HorariosServices extends ChangeNotifier {
     final resp = await http.get(url);
 
     final Map<String, dynamic> horariosMap = json.decode(resp.body);
-    //final String json_contenido = json.decode(resp.body);
     final tempHorarioPelu = Horario.fromMap(horariosMap);
-    // Solo debería haber un horario pero se queja si no lo hago una lista...
+
+    List<Horario> horarioPelu = []; // Initialize horarioPelu as an empty list
     horarioPelu.add(tempHorarioPelu);
 
     isLoading = false;

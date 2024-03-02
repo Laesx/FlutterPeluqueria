@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/models/models.dart';
+import '../services/horarios_services.dart';
+
 import 'package:intl/intl.dart';
 
 extension on TimeOfDay {
@@ -26,6 +28,14 @@ class OpeningHoursManager extends StatefulWidget {
 }
 
 class _OpeningHoursManagerState extends State<OpeningHoursManager> {
+  List<Horario> oldHorario = [];
+  static Horario horario = Horario.empty();
+
+  void loadHorarios() async {
+    oldHorario = await HorariosServices().loadHorarioPelu();
+    horario = oldHorario[0];
+  }
+
   static List<String> _daysOfWeek = [
     'Lunes',
     'Martes',
@@ -46,23 +56,43 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
   @override
   void initState() {
     super.initState();
-    _daysOfWeek.forEach((day) {
-      _morningOpeningTimes[day] = TimeOfDay(hour: 9, minute: 0);
-      _morningClosingTimes[day] = TimeOfDay(hour: 12, minute: 0);
-      _afternoonOpeningTimes[day] = TimeOfDay(hour: 13, minute: 0);
-      _afternoonClosingTimes[day] = TimeOfDay(hour: 17, minute: 0);
-      _morningClosed[day] = false;
-      _afternoonClosed[day] = false;
-    });
-  }
+    loadHorarios();
 
-  void printSchedule() {
-    for (String day in _daysOfWeek) {
-      print('$day:');
-      print(
-          '  Mañana: ${_morningClosed[day]! ? "cerrado" : "${_morningOpeningTimes[day]!.format24Hour(context)} - ${_morningClosingTimes[day]!.format24Hour(context)}"}');
-      print(
-          '  Tarde: ${_afternoonClosed[day]! ? "cerrado" : "${_afternoonOpeningTimes[day]!.format24Hour(context)} - ${_afternoonClosingTimes[day]!.format24Hour(context)}"}');
+    List<Dia> diasHorario = horario.getDiasSemana();
+
+    for (int i = 0; i < diasHorario.length; i++) {
+      Dia dia = diasHorario[i];
+
+      if (dia.empiezaMan != "cerrado") {
+        _morningOpeningTimes[_daysOfWeek[i]] = TimeOfDay(
+          hour: int.parse(dia.empiezaMan.split(":")[0]),
+          minute: int.parse(dia.empiezaMan.split(":")[1]),
+        );
+      }
+
+      if (dia.acabaMan != "cerrado") {
+        _morningClosingTimes[_daysOfWeek[i]] = TimeOfDay(
+          hour: int.parse(dia.acabaMan.split(":")[0]),
+          minute: int.parse(dia.acabaMan.split(":")[1]),
+        );
+      }
+
+      if (dia.empiezaTarde != "cerrado") {
+        _afternoonOpeningTimes[_daysOfWeek[i]] = TimeOfDay(
+          hour: int.parse(dia.empiezaTarde.split(":")[0]),
+          minute: int.parse(dia.empiezaTarde.split(":")[1]),
+        );
+      }
+
+      if (dia.acabaTarde != "cerrado") {
+        _afternoonClosingTimes[_daysOfWeek[i]] = TimeOfDay(
+          hour: int.parse(dia.acabaTarde.split(":")[0]),
+          minute: int.parse(dia.acabaTarde.split(":")[1]),
+        );
+      }
+
+      _morningClosed[_daysOfWeek[i]] = dia.empiezaMan == "cerrado";
+      _afternoonClosed[_daysOfWeek[i]] = dia.empiezaTarde == "cerrado";
     }
   }
 
@@ -208,6 +238,7 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
         ),
         ElevatedButton(
           onPressed: () {
+            Horario.showInfo(horario);
             // Add your button functionality here
             Navigator.pop(context);
           },

@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import './hours_screen.dart';
@@ -5,29 +7,38 @@ import 'package:flutter_peluqueria/models/models.dart';
 import '../services/horarios_services.dart';
 
 class CalendarScreen extends StatefulWidget {
+  Horario getOldHorario() {
+    return _CalendarScreenState.getOldHorario();
+  }
+
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  static Horario? horario;
+  List<Horario> oldHorario = [];
+  static Horario horario = Horario.empty();
+
+  bool horarioLoaded = false;
   // Create instances of OpeningCalendar and OpeningHours
   late OpeningCalendar openingCalendar;
 
   @override
   void initState() {
     super.initState();
-
+    loadHorarios();
     // Initialize the OpeningCalendar and OpeningHours instances
     openingCalendar = OpeningCalendar();
   }
 
-  static getHorario() {
-    return horario;
+  //Nse pk
+  void loadHorarios() async {
+    oldHorario = await HorariosServices().loadHorarioPelu();
+    horario = oldHorario[0];
   }
 
-  static setHorario(Horario horario) {
-    _CalendarScreenState.horario = horario;
+  static Horario getOldHorario() {
+    return horario;
   }
 
   @override
@@ -39,10 +50,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Load the horarios
+          //Showing the info from oldHorario
           openingCalendar,
           // Use the OpeningCalendar instance
           // Use the OpeningHours instance
-
+          ElevatedButton(
+              onPressed: () {
+                Horario.showInfo(horario);
+                print(horario.festivos);
+                openingCalendar.setClosedDays(horario.festivos);
+              },
+              child: Text('Leer datos')),
           // Botón para guardar cambios
           ElevatedButton(
             onPressed: () {
@@ -50,27 +69,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
               List<DateTime> closedDays = openingCalendar.getClosedDays();
               // print the closed days and opening hours
               // Save the closed days and opening hours to a file
-              List<Dia> dias = OpeningHoursManager().getDaysOfWeek();
+              if (OpeningCalendar.pushed()) {
+                List<Dia> dias = OpeningHoursManager().getDaysOfWeek();
 
-              //Probar a hacer tomap de los dias
-              Function mapaLunes = () => {"lunes": dias[0].toMap()};
-              print(mapaLunes());
-
-              //OpeningHoursManager().printDays();
-
-              Horario horario = Horario(
-                festivos: closedDays,
-                lunes: dias[0],
-                martes: dias[1],
-                miercoles: dias[2],
-                jueves: dias[3],
-                viernes: dias[4],
-                sabado: dias[5],
-                domingo: dias[6],
-              );
-              setHorario(horario);
-// Notify that horario was created successfully
-              HorariosServices().saveHorarioPelu(horario);
+                Horario newHorario = Horario(
+                  festivos: closedDays,
+                  lunes: dias[0],
+                  martes: dias[1],
+                  miercoles: dias[2],
+                  jueves: dias[3],
+                  viernes: dias[4],
+                  sabado: dias[5],
+                  domingo: dias[6],
+                );
+                HorariosServices().saveHorarioPelu(newHorario);
+              } else {
+                HorariosServices().saveHorarioPelu(horario);
+              }
             },
             child: Text('Guardar man'),
           ),
@@ -89,6 +104,10 @@ class OpeningCalendar extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
+  static bool pushed() {
+    return _OpeningCalendarState.pulsado;
+  }
+
   @override
   _OpeningCalendarState createState() => _OpeningCalendarState();
 
@@ -106,10 +125,30 @@ class OpeningCalendar extends StatefulWidget {
     });
     return closedDays;
   }
+
+  void setClosedDays(List<DateTime> closedDays) {
+    openingCalendar.clear(); // Clear the existing map
+
+    // Iterate over all days of the week
+    for (int i = 0; i < 7; i++) {
+      // Get the date for the current day
+      DateTime day = DateTime.now().add(Duration(days: i));
+
+      // If the day is in the list of closed days, set its status to 'Closed'
+      if (closedDays.any((closedDay) => closedDay.weekday == day.weekday)) {
+        openingCalendar[day] = ['Closed'];
+      }
+    }
+  }
 }
 
 class _OpeningCalendarState extends State<OpeningCalendar> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
+  static bool pulsado = false;
+
+  static bool pushed() {
+    return pulsado;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -207,6 +246,9 @@ class _OpeningCalendarState extends State<OpeningCalendar> {
           ),
           ElevatedButton(
             onPressed: () {
+              setState(() {
+                pulsado = true;
+              });
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => OpeningHoursManager()),
@@ -219,169 +261,3 @@ class _OpeningCalendarState extends State<OpeningCalendar> {
     );
   }
 }
-/*
-extension on TimeOfDay {
-  String format24Hour(BuildContext context) {
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
-    final String formattedTimeOfDay =
-        localizations.formatTimeOfDay(this, alwaysUse24HourFormat: true);
-    return formattedTimeOfDay;
-  }
-}
-
-class OpeningHoursManager extends StatefulWidget {
-  @override
-  _OpeningHoursManagerState createState() => _OpeningHoursManagerState();
-}
-
-class _OpeningHoursManagerState extends State<OpeningHoursManager> {
-  final List<String> _daysOfWeek = [
-    'Lunes',
-    'Martes',
-    'Miércoles',
-    'Jueves',
-    'Viernes',
-    'Sábado',
-    'Domingo',
-  ];
-
-  Map<String, TimeOfDay> _morningOpeningTimes = {};
-  Map<String, TimeOfDay> _morningClosingTimes = {};
-  Map<String, TimeOfDay> _afternoonOpeningTimes = {};
-  Map<String, TimeOfDay> _afternoonClosingTimes = {};
-  Map<String, bool> _morningClosed = {};
-  Map<String, bool> _afternoonClosed = {};
-
-  @override
-  void initState() {
-    super.initState();
-    _daysOfWeek.forEach((day) {
-      _morningOpeningTimes[day] = TimeOfDay(hour: 9, minute: 0);
-      _morningClosingTimes[day] = TimeOfDay(hour: 12, minute: 0);
-      _afternoonOpeningTimes[day] = TimeOfDay(hour: 13, minute: 0);
-      _afternoonClosingTimes[day] = TimeOfDay(hour: 17, minute: 0);
-      _morningClosed[day] = false;
-      _afternoonClosed[day] = false;
-    });
-  }
-
-  void printSchedule() {
-    for (String day in _daysOfWeek) {
-      print('$day:');
-      print(
-          '  Mañana: ${_morningClosed[day]! ? "cerrado" : "${_morningOpeningTimes[day]!.format24Hour(context)} - ${_morningClosingTimes[day]!.format24Hour(context)}"}');
-      print(
-          '  Tarde: ${_afternoonClosed[day]! ? "cerrado" : "${_afternoonOpeningTimes[day]!.format24Hour(context)} - ${_afternoonClosingTimes[day]!.format24Hour(context)}"}');
-    }
-  }
-
-  Future<void> _selectTime(BuildContext context, String day, bool isMorning,
-      bool isOpeningTime) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: isOpeningTime
-          ? (isMorning
-              ? _morningOpeningTimes[day]!
-              : _afternoonOpeningTimes[day]!)
-          : (isMorning
-              ? _morningClosingTimes[day]!
-              : _afternoonClosingTimes[day]!),
-    );
-    if (picked != null)
-      setState(() {
-        if (isOpeningTime) {
-          if (isMorning) {
-            _morningOpeningTimes[day] = picked;
-          } else {
-            _afternoonOpeningTimes[day] = picked;
-          }
-        } else {
-          if (isMorning) {
-            _morningClosingTimes[day] = picked;
-          } else {
-            _afternoonClosingTimes[day] = picked;
-          }
-        }
-      });
-    Navigator.pop(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            itemCount: _daysOfWeek.length,
-            itemBuilder: (context, index) {
-              String day = _daysOfWeek[index];
-              return Card(
-                child: ListTile(
-                  title: Text(day),
-                  subtitle: Text(
-                    'Mañana: ${_morningClosed[day]! ? "cerrado" : "${_morningOpeningTimes[day]!.format24Hour(context)} - ${_morningClosingTimes[day]!.format24Hour(context)}"}\n'
-                    'Tarde: ${_afternoonClosed[day]! ? "cerrado" : "${_afternoonOpeningTimes[day]!.format24Hour(context)} - ${_afternoonClosingTimes[day]!.format24Hour(context)}"}',
-                  ),
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                              title: Text('Select Option'),
-                              content: SingleChildScrollView(
-                                // Add this
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min, // Set this
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: () =>
-                                          _selectTime(context, day, true, true),
-                                      child: Text('Hora apertura mañana'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => _selectTime(
-                                          context, day, true, false),
-                                      child: Text('Hora cierre mañana'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => _selectTime(
-                                          context, day, false, true),
-                                      child: Text('Hora apertura tarde'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => _selectTime(
-                                          context, day, false, false),
-                                      child: Text('Hora cierre tarde'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          _morningClosed[day] = true;
-                                          _afternoonClosed[day] = true;
-                                        });
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text('Cerrado (todo el dia)'),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ));
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            // Add your button functionality here
-            printSchedule();
-          },
-          child: Text('Guardar cambios'),
-        ),
-      ],
-    );
-  }
-}
-*/
