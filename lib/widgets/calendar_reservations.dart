@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_peluqueria/widgets/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../utils.dart';
 
@@ -147,8 +146,6 @@ class _CalendarReservationsState extends State<CalendarReservations> {
           ),
         ),
         */
-        HoursPanel.singleSelection(
-            startTime: 10, endTime: 20, onTimePressed: (int time) {})
       ],
     );
   }
