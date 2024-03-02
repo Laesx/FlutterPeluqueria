@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_peluqueria/models/usuario.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_peluqueria/widgets/simple_button.dart';
 import 'package:flutter_peluqueria/widgets/password_text_field.dart';
+import 'package:flutter_peluqueria/providers/login_form_provider.dart';
+import 'package:flutter_peluqueria/providers/connected_user_provider.dart';
+import 'package:flutter_peluqueria/services/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -133,7 +138,7 @@ class _LoginForm extends StatelessWidget {
           const SizedBox(height: 40),
           // Logo
           const Icon(
-            Icons.chat,
+            Icons.chair,
             size: 100,
           ),
           const SizedBox(height: 40),
