@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 class HorariosServices extends ChangeNotifier {
   final String _baseURL =
-      'fl-peluqueria-27d72-default-rtdb.europe-west1.firebasedatabase.app';
+      'horarios-d3ffb-default-rtdb.europe-west1.firebasedatabase.app';
   final List<HorarioPeluquero> horarios = [];
   final List<Horario> horarioPelu = [];
 

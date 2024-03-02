@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:convert';
@@ -5,6 +7,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import './hours_screen.dart';
 import '../models/horario.dart';
+import '../services/horarios_services.dart';
 
 class OpeningHoursCalendarScreen extends StatefulWidget {
   @override
@@ -14,6 +17,7 @@ class OpeningHoursCalendarScreen extends StatefulWidget {
 
 class _OpeningHoursCalendarScreenState
     extends State<OpeningHoursCalendarScreen> {
+  static Horario? horario;
   // Create instances of OpeningCalendar and OpeningHours
   late OpeningCalendar openingCalendar;
 
@@ -23,6 +27,14 @@ class _OpeningHoursCalendarScreenState
 
     // Initialize the OpeningCalendar and OpeningHours instances
     openingCalendar = OpeningCalendar();
+  }
+
+  static getHorario() {
+    return horario;
+  }
+
+  static setHorario(Horario horario) {
+    _OpeningHoursCalendarScreenState.horario = horario;
   }
 
   @override
@@ -44,10 +56,28 @@ class _OpeningHoursCalendarScreenState
               // Get the closed days and opening hours from the instances
               List<DateTime> closedDays = openingCalendar.getClosedDays();
               // print the closed days and opening hours
-              print(closedDays);
               // Save the closed days and opening hours to a file
               List<Dia> dias = OpeningHoursManager().getDaysOfWeek();
-              OpeningHoursManager().printDays();
+
+              //Probar a hacer tomap de los dias
+              Function mapaLunes = () => {"lunes": dias[0].toMap()};
+              print(mapaLunes());
+
+              //OpeningHoursManager().printDays();
+
+              Horario horario = Horario(
+                festivos: closedDays,
+                lunes: dias[0],
+                martes: dias[1],
+                miercoles: dias[2],
+                jueves: dias[3],
+                viernes: dias[4],
+                sabado: dias[5],
+                domingo: dias[6],
+              );
+              setHorario(horario);
+// Notify that horario was created successfully
+              HorariosServices().saveHorarioPelu(horario);
             },
             child: Text('Guardar man'),
           ),
