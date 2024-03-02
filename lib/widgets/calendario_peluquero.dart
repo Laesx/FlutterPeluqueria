@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/models/models.dart';
 import 'package:flutter_peluqueria/services/services.dart';
-import 'package:flutter_peluqueria/widgets/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../utils.dart';
 import 'package:provider/provider.dart';
@@ -57,9 +56,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
       // Return a default Horario object or handle it accordingly
       return Horario.empty(); // Assuming Horario has a default constructor
     }
-
     //reservasServices.getReservasByDate(day);
-
     horariosServices.horarios.forEach((horarioPeluquero) {
       if (horarioPeluquero.peluquero == 'test') {
         horario = (horarioPeluquero.horario);
@@ -92,9 +89,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
         horario.addAll(getTimes(value['empieza_tarde'], value['acaba_tarde']));
       }
     });
-
-    print(horario.toString());
-
+    //print(horario.toString());
     return horario;
   }
 
@@ -161,20 +156,19 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
       });
-
-      //_selectedSchedule.value = _horarioDia(_getScheduleForDay(_selectedDay!), _selectedDay!);
-
       _selectedSchedule.value = _getHorarioPeluString(_selectedDay!);
+      // Limpia la selección de hora al cambiar de día
+      lastSelection = null;
     }
   }
 
-  // Ultima hora que se ha seleccionado
+  // Variable que guardará la ultima hora que se ha seleccionado
   int? lastSelection;
 
   @override
   Widget build(BuildContext context) {
-    // Esto maneja cuando se selecciona una hora
-    final ValueChanged<int> onTimePressed = (timeSelected) {
+    // Esta función maneja cuando se selecciona una hora
+    onTimePressed(timeSelected) {
       //print(timeSelected.toString());
       //print(lastSelection);
       setState(() {
@@ -185,7 +179,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
         }
       });
       //print(lastSelection);
-    };
+    }
 
     return Column(
       children: [
@@ -200,7 +194,6 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
           rangeSelectionMode: _rangeSelectionMode,
           startingDayOfWeek: StartingDayOfWeek.monday,
           calendarStyle: const CalendarStyle(
-            // Use `CalendarStyle` to customize the UI
             outsideDaysVisible: false,
           ),
           onDaySelected: _onDaySelected,
@@ -222,16 +215,8 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
                       label: dia[i],
                       value: i,
                       timeSelected: lastSelection,
+                      // Esto es lo que se ejecuta al seleccionar una hora
                       onPressed: (timeSelected) {
-                        /*
-                        setState(() {
-                          if (lastSelection == timeSelected) {
-                            lastSelection = null;
-                          } else {
-                            lastSelection = timeSelected;
-                          }
-                        });
-                        */
                         onTimePressed(timeSelected);
                       },
                       singleSelection: true,
@@ -240,39 +225,6 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
                 ],
               );
             }),
-        // Si se quita el Expanded, el ValueListenableBuilder no funciona
-        // dios sabra porque
-        /*
-        Expanded(
-          child: ValueListenableBuilder<List<String>>(
-            valueListenable: _selectedSchedule,
-            builder: (context, dia, _) {
-              return GridView.builder(
-                itemCount: dia.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4, mainAxisSpacing: 5, crossAxisSpacing: 5),
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 4.0,
-                      vertical: 4.0,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(),
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    child: ListTile(
-                      onTap: () => print(dia[index].toString()),
-                      // Esto está muy mal hecho
-                      title: Text(dia[index].toString()),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        ),
-        */
       ],
     );
   }

@@ -38,7 +38,6 @@ class _BotonHoraState extends State<BotonHora> {
     if (widget.timeSelected != oldWidget.timeSelected) {
       setState(() {
         selected = widget.timeSelected == widget.value;
-        //selected = true;
       });
     }
     //print("TimeSelected: ${widget.timeSelected}");
