@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 class HorariosServices extends ChangeNotifier {
   final String _baseURL =
-      'fl-peluqueria-27d72-default-rtdb.europe-west1.firebasedatabase.app';
+      'horarios-d3ffb-default-rtdb.europe-west1.firebasedatabase.app';
   final List<HorarioPeluquero> horarios = [];
   final List<Horario> horarioPelu = [];
 
@@ -36,6 +36,24 @@ class HorariosServices extends ChangeNotifier {
     notifyListeners();
 
     return horarioPelu;
+  }
+
+  Future<void> saveHorarioPelu(Horario horario) async {
+    notifyListeners();
+
+    final url = Uri.https(_baseURL, 'horario_peluqueria.json');
+
+    final response = await http.put(
+      url,
+      body: horario.toJson(), // Convert the Horario to a JSON string
+      headers: {"Content-Type": "application/json"},
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Failed to save horario');
+    }
+
+    notifyListeners();
   }
 
   // TODO Falta Probar
