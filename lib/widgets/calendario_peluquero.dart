@@ -6,6 +6,8 @@ import 'package:table_calendar/table_calendar.dart';
 import '../utils.dart';
 import 'package:provider/provider.dart';
 
+import 'boton_hora.dart';
+
 class CalendarioPeluquero extends StatefulWidget {
   const CalendarioPeluquero({super.key});
 
@@ -84,8 +86,6 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
       horarioMapa = horarioPelu.toMap();
     });
 
-    // Esto es probablemente de los peores codigos que he escrito en mi vida
-    // Los modelos estan mapeados como la más absoluta mierda pero bueno
     horarioMapa.forEach((key, value) {
       if (key == diaSemana(day)) {
         horario.addAll(getTimes(value['empieza_man'], value['acaba_man']));
@@ -170,10 +170,16 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
 
   @override
   Widget build(BuildContext context) {
-    //reservasServices = Provider.of<ReservasServices>(context);
-    //horariosServices = Provider.of<HorariosServices>(context);
-
-    //final horarioPelu = _getHorarioPeluString(day);
+    int? lastSelection;
+    final ValueChanged<int> onTimePressed = (timeSelected) {
+      setState(() {
+        if (lastSelection == timeSelected) {
+          lastSelection = null;
+        } else {
+          lastSelection = timeSelected;
+        }
+      });
+    };
 
     return Column(
       children: [
@@ -196,9 +202,40 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
             _focusedDay = focusedDay;
           },
         ),
-        const SizedBox(height: 8.0),
+        const SizedBox(height: 20.0),
+        ValueListenableBuilder<List<String>>(
+            valueListenable: _selectedSchedule,
+            builder: (context, dia, _) {
+              return Wrap(
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: [
+                  for (int i = 0; i < dia.length; i++) ...[
+                    BotonHora(
+                      label: dia[i],
+                      value: i,
+                      timeSelected: lastSelection,
+                      onPressed: (timeSelected) {
+                        /*
+                        setState(() {
+                          if (lastSelection == timeSelected) {
+                            lastSelection = null;
+                          } else {
+                            lastSelection = timeSelected;
+                          }
+                        });
+                        */
+                        onTimePressed(timeSelected);
+                      },
+                      singleSelection: true,
+                    ),
+                  ],
+                ],
+              );
+            }),
         // Si se quita el Expanded, el ValueListenableBuilder no funciona
         // dios sabra porque
+        /*
         Expanded(
           child: ValueListenableBuilder<List<String>>(
             valueListenable: _selectedSchedule,
@@ -228,6 +265,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
             },
           ),
         ),
+        */
       ],
     );
   }
