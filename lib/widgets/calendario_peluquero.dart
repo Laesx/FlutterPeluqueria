@@ -168,10 +168,15 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     }
   }
 
+  // Ultima hora que se ha seleccionado
+  int? lastSelection;
+
   @override
   Widget build(BuildContext context) {
-    int? lastSelection;
+    // Esto maneja cuando se selecciona una hora
     final ValueChanged<int> onTimePressed = (timeSelected) {
+      //print(timeSelected.toString());
+      //print(lastSelection);
       setState(() {
         if (lastSelection == timeSelected) {
           lastSelection = null;
@@ -179,6 +184,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
           lastSelection = timeSelected;
         }
       });
+      //print(lastSelection);
     };
 
     return Column(
@@ -212,6 +218,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
                 children: [
                   for (int i = 0; i < dia.length; i++) ...[
                     BotonHora(
+                      enabledTimes: null,
                       label: dia[i],
                       value: i,
                       timeSelected: lastSelection,

@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 
 class BotonHora extends StatefulWidget {
   const BotonHora({
-    super.key,
+    Key? key,
     this.enabledTimes,
     required this.label,
     required this.value,
     required this.onPressed,
     required this.singleSelection,
     required this.timeSelected,
-  });
+  }) : super(key: key);
 
   final List<int>? enabledTimes;
   final String label;
@@ -24,29 +24,36 @@ class BotonHora extends StatefulWidget {
 }
 
 class _BotonHoraState extends State<BotonHora> {
-  var selected = false;
+  late bool selected;
+
+  @override
+  void initState() {
+    super.initState();
+    selected = widget.timeSelected == widget.value;
+  }
+
+  @override
+  void didUpdateWidget(BotonHora oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.timeSelected != oldWidget.timeSelected) {
+      setState(() {
+        selected = widget.timeSelected == widget.value;
+        //selected = true;
+      });
+    }
+    //print("TimeSelected: ${widget.timeSelected}");
+    //print("OldWidget: ${oldWidget.timeSelected}");
+  }
 
   @override
   Widget build(BuildContext context) {
-    final BotonHora(
-      :singleSelection,
-      :timeSelected,
-      :value,
-      :label,
-      :enabledTimes,
-      :onPressed,
-    ) = widget;
-
-    if (singleSelection && timeSelected != null) {
-      selected = timeSelected == value;
-    }
-
     final textColor = selected ? Colors.white : AppTheme.textColor;
     var buttonColor = selected ? AppTheme.buttonColor : Colors.black;
     final buttonBorderColor =
         selected ? AppTheme.primaryColor : AppTheme.textColor;
 
-    final disableTime = enabledTimes != null && !enabledTimes.contains(value);
+    final disableTime = widget.enabledTimes != null &&
+        !widget.enabledTimes!.contains(widget.value);
 
     if (disableTime) {
       buttonColor = Colors.grey[400]!;
@@ -59,7 +66,7 @@ class _BotonHoraState extends State<BotonHora> {
           : () {
               setState(() {
                 selected = !selected;
-                onPressed(value);
+                widget.onPressed(widget.value);
               });
             },
       child: Container(
@@ -72,7 +79,7 @@ class _BotonHoraState extends State<BotonHora> {
         ),
         child: Center(
           child: Text(
-            label,
+            widget.label,
             style: TextStyle(
               color: textColor,
               fontSize: 12,
