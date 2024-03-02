@@ -9,7 +9,7 @@ class ConnectedUserProvider extends ChangeNotifier {
     id: "",
     nombre: "Usuario de prueba",
     rol: "Gerente",
-    telefono: "",
+    telefono: 555555,
     verificado: false,
   );
 

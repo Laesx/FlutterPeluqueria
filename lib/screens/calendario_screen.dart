@@ -1,22 +1,15 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'dart:convert';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import './hours_screen.dart';
-import '../models/horario.dart';
+import 'package:flutter_peluqueria/models/models.dart';
 import '../services/horarios_services.dart';
 
-class OpeningHoursCalendarScreen extends StatefulWidget {
+class CalendarScreen extends StatefulWidget {
   @override
-  _OpeningHoursCalendarScreenState createState() =>
-      _OpeningHoursCalendarScreenState();
+  _CalendarScreenState createState() => _CalendarScreenState();
 }
 
-class _OpeningHoursCalendarScreenState
-    extends State<OpeningHoursCalendarScreen> {
+class _CalendarScreenState extends State<CalendarScreen> {
   static Horario? horario;
   // Create instances of OpeningCalendar and OpeningHours
   late OpeningCalendar openingCalendar;
@@ -34,7 +27,7 @@ class _OpeningHoursCalendarScreenState
   }
 
   static setHorario(Horario horario) {
-    _OpeningHoursCalendarScreenState.horario = horario;
+    _CalendarScreenState.horario = horario;
   }
 
   @override

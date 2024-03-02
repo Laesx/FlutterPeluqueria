@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       ),
       home: MyHomePage(),
       routes: {
-        '/screens/calendario_screen': (context) => OpeningHoursCalendarScreen(),
+        '/screens/calendario_screen': (context) => CalendarScreen(),
         '/screens/hours_screen': (context) => OpeningHoursManager(),
       },
     );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/horario.dart';
+import 'package:flutter_peluqueria/models/models.dart';
 import 'package:intl/intl.dart';
 
 extension on TimeOfDay {

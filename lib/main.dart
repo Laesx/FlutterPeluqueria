@@ -3,6 +3,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'screens/screens.dart';
 import 'services/services.dart';
+import 'providers/providers.dart';
 
 void main() {
   initializeDateFormatting().then((_) => runApp(AppState()));
@@ -33,7 +34,8 @@ class AppState extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => AuthService()),
         ChangeNotifierProvider(create: (context) => HorariosServices()),
         ChangeNotifierProvider(create: (context) => ReservasServices()),
-        ChangeNotifierProvider(create: (context) => UsuariosServices())
+        ChangeNotifierProvider(create: (context) => UsuariosServices()),
+        ChangeNotifierProvider(create: (context) => ConnectedUserProvider())
       ],
       child: MyApp(),
     );
