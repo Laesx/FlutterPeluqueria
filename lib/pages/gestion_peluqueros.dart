@@ -96,4 +96,6 @@ class Peluquero {
     required this.apellidos,
     required this.telefono,
   });
+
+  set id(String id) {}
 }
