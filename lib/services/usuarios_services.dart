@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 class UsuariosServices extends ChangeNotifier {
   final String _baseURL =
       'fl-peluqueria-27d72-default-rtdb.europe-west1.firebasedatabase.app';
+  final String _firebaseToken = 'B9KTDm0g3J9qAs1ZlQRt5veeHiIObJo5ZTVwzvzp';
   final List<Usuario> usuarios = [];
   Usuario? usuarioSeleccionado;
 
@@ -20,7 +21,7 @@ class UsuariosServices extends ChangeNotifier {
   Future<List<Usuario>> loadUsuarios() async {
     notifyListeners();
 
-    final url = Uri.https(_baseURL, 'usuarios.json');
+    final url = Uri.https(_baseURL, 'usuarios.json', {'auth': _firebaseToken});
     final resp = await http.get(url);
 
     final Map<String, dynamic> usuariosMap = json.decode(resp.body);
