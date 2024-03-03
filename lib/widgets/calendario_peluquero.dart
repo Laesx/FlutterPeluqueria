@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/models/models.dart';
+import 'package:flutter_peluqueria/models/usuario.dart';
 import 'package:flutter_peluqueria/services/services.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../providers/providers.dart';
 import '../utils.dart';
 import 'package:provider/provider.dart';
 
@@ -21,6 +23,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
 
   late ReservasServices reservasServices;
   late HorariosServices horariosServices;
+  late Usuario usuarioActivo;
 
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -36,6 +39,8 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     super.didChangeDependencies();
     reservasServices = Provider.of<ReservasServices>(context);
     horariosServices = Provider.of<HorariosServices>(context);
+
+    usuarioActivo = Provider.of<ConnectedUserProvider>(context).activeUser;
     //_selectedSchedule = ValueNotifier(_horarioDia(_getScheduleForDay(_selectedDay!), _selectedDay!));
     _selectedSchedule = ValueNotifier(_getHorarioPeluString(_selectedDay!));
   }
@@ -49,34 +54,57 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
   // TODO Por implementar
   // La idea es que luego el _getHorarioPeluString
   // llame a esta funcion y devuelva botones u otra cosa que no sea solo texto
-  Horario _getReservasPorDia(DateTime day) {
-    Horario horario = Horario.empty();
+  List<Reserva> _getReservasPorDia(DateTime day) {
+    List<Reserva> reservas = [];
 
-    if (reservasServices.isLoading || horariosServices.isLoading) {
-      // Return a default Horario object or handle it accordingly
-      return Horario.empty(); // Assuming Horario has a default constructor
-    }
-    //reservasServices.getReservasByDate(day);
-    horariosServices.horarios.forEach((horarioPeluquero) {
-      if (horarioPeluquero.peluquero == 'test') {
-        horario = (horarioPeluquero.horario);
+    Future<List<Reserva>> reservasDia = reservasServices.getReservasByDate(day);
+
+    // Comprueba que sea el peluquero activo el que tiene la reserva
+    reservasDia.then((value) {
+      for (var reserva in value) {
+        if (reserva.peluquero == usuarioActivo.id) {
+          reservas.add(reserva);
+        }
       }
     });
 
-    return horario;
+    return reservas;
   }
 
   // Esta función devuelve una lista con todas las horas que está abierta
   // la peluqueria en un día concreto
   List<String> _getHorarioPeluString(DateTime day) {
     List<String> horario = [];
-
     Map<String, dynamic> horarioMapa = {};
 
     // Esto creo que no hace falta
     if (reservasServices.isLoading || horariosServices.isLoading) {
       // Return a default Horario object or handle it accordingly
       return horario; // Assuming Horario has a default constructor
+    }
+
+    // Esto es para comprobar si el día es festivo, primero de los festivos de la peluqueria
+    for (var horarioPelu in horariosServices.horarioPelu) {
+      for (var festivo in horarioPelu.festivos) {
+        if (festivo.day == day.day &&
+            festivo.month == day.month &&
+            festivo.year == day.year) {
+          return horario;
+        }
+      }
+    }
+
+    // Ahora los festivos del peluquero en si
+    for (var horarioPeluquero in horariosServices.horarios) {
+      if (horarioPeluquero.peluquero == usuarioActivo.id) {
+        for (var festivo in horarioPeluquero.horario.festivos) {
+          if (festivo.day == day.day &&
+              festivo.month == day.month &&
+              festivo.year == day.year) {
+            return horario;
+          }
+        }
+      }
     }
 
     horariosServices.horarioPelu.forEach((horarioPelu) {

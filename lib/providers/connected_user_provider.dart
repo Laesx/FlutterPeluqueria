@@ -6,7 +6,7 @@ class ConnectedUserProvider extends ChangeNotifier {
   Usuario activeUser = Usuario(
     email: "a",
     genero: "",
-    id: "",
+    id: "test",
     nombre: "Usuario de prueba",
     rol: "Gerente",
     telefono: 555555,
