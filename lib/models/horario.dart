@@ -184,4 +184,8 @@ class Horario {
     sabado = dias[5];
     domingo = dias[6];
   }
+
+  void removeFestivo(DateTime festivo) {
+    festivos.remove(festivo);
+  }
 }
