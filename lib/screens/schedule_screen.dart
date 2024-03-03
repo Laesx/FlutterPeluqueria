@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_peluqueria/screens/screens.dart';
 import 'package:flutter_peluqueria/widgets/widgets.dart';
 
 class ScheduleScreen extends StatelessWidget {
@@ -7,9 +8,8 @@ class ScheduleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('TestScreen'),
-        ),
+        appBar: MiAppBar(),
+        drawer: MiMenuDesplegable(),
         body: CalendarioPeluquero());
   }
 }
