@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:flutter_peluqueria/models/models.dart';
 import '../utils.dart';
+import 'widgets.dart';
 
 class CalendarReservations extends StatefulWidget {
   const CalendarReservations({super.key});
@@ -82,6 +83,32 @@ class _CalendarReservationsState extends State<CalendarReservations> {
     }
   }
 
+  void _mostrarTarjeta(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          child: ReservaCard(
+            reserva: Reserva(
+              cancelada: true,
+              fecha: [DateTime.now()],
+              pagada: true,
+              pago: 'Tarjeta de crédito',
+              peluquero: 'Nombre del peluquero',
+              servicios: {
+                'Servicio 1': true,
+                'Servicio 2': true,
+                // Agrega los servicios que desees mostrar
+              },
+              usuario: 'Nombre del usuario',
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -99,7 +126,7 @@ class _CalendarReservationsState extends State<CalendarReservations> {
           rangeSelectionMode: _rangeSelectionMode,
           eventLoader: _getEventsForDay,
           startingDayOfWeek: StartingDayOfWeek.monday,
-          calendarStyle: CalendarStyle(
+          calendarStyle: const CalendarStyle(
             // Use `CalendarStyle` to customize the UI
             outsideDaysVisible: false,
           ),
@@ -117,8 +144,6 @@ class _CalendarReservationsState extends State<CalendarReservations> {
           },
         ),
         const SizedBox(height: 8.0),
-        // ESTO DE ABAJO ES PARA EL QUE TENGA QUE HACER LA SCREEN DE RESERVAS
-        /*
         Expanded(
           child: ValueListenableBuilder<List<Event>>(
             valueListenable: _selectedEvents,
@@ -136,7 +161,10 @@ class _CalendarReservationsState extends State<CalendarReservations> {
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: ListTile(
-                      onTap: () => print('${value[index]}'),
+                      onTap: () {
+                        print('${value[index]}');
+                        _mostrarTarjeta(context);
+                      },
                       title: Text('${value[index]}'),
                     ),
                   );
@@ -145,7 +173,6 @@ class _CalendarReservationsState extends State<CalendarReservations> {
             },
           ),
         ),
-        */
       ],
     );
   }

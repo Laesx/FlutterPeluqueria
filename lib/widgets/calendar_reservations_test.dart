@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/models/models.dart';
+import 'package:flutter_peluqueria/widgets/boton_hora.dart';
 import 'package:flutter_peluqueria/widgets/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../utils.dart';
-import 'package:flutter/services.dart';
 
 class CalendarReservationsTest extends StatefulWidget {
   const CalendarReservationsTest({super.key});
@@ -17,14 +17,17 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
   late final ValueNotifier<Horario> _selectedSchedule;
   final CalendarFormat _calendarFormat = CalendarFormat.week;
   final RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.disabled;
+  // Este de abajo se puede cambiar por el de arriba para que se pueda seleccionar un rango de fechas
+  // Manteniendo pulsado el de abajo se puede seleccionar un rango de fechas
+  //RangeSelectionMode _rangeSelectionMode2 = RangeSelectionMode.toggledOff;
+
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-
-  final ReservasServices _reservasServices = ReservasServices();
 
   @override
   void initState() {
     super.initState();
+
     _selectedDay = _focusedDay;
     _selectedSchedule = ValueNotifier(_getScheduleForDay(_selectedDay!));
   }
@@ -35,13 +38,14 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
     super.dispose();
   }
 
-  Horario _getScheduleForDay(DateTime day) {
+  HorarioPeluquero _getScheduleForDay(DateTime day) {
     DateTime start = DateTime(day.year, day.month, day.day, 8, 0);
     DateTime end = DateTime(day.year, day.month, day.day, 20, 0);
-    Horario horario = Horario(
+    HorarioPeluquero horario = HorarioPeluquero(
       peluquero: 'Peluquero 1',
-      horario: [start, end],
+      horario: [],
     );
+
     return horario;
   }
 
@@ -51,37 +55,32 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
       });
+
       _selectedSchedule.value = _getScheduleForDay(selectedDay);
     }
   }
 
-  void _mostrarTarjeta(BuildContext context, Reserva reserva) {
+  void _mostrarTarjeta(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return Container(
           padding: EdgeInsets.all(16.0),
-          child: AppointmentCard(
-            name: reserva.peluquero,
-            time: reserva.fecha[0]
-                .toString(), // Mostrar la primera fecha de la lista de fechas
-            date: reserva.fecha[0]
-                .toString(), // Mostrar la primera fecha de la lista de fechas
-            services: reserva.servicios.keys.map((servicioId) {
-              // Aquí podrías obtener los detalles del servicio si es necesario
-              return {'name': servicioId, 'price': ''};
-            }).toList(),
-            paymentMethod: reserva.pago,
-            verified: true, // Cambiar según sea necesario
+          child: ReservaCard(
+            name: 'Nombre de la peluquería',
+            time: 'Hora de la cita',
+            date: 'Fecha de la cita',
+            services: [
+              {'name': 'Servicio 1', 'price': 'Precio 1'},
+              {'name': 'Servicio 2', 'price': 'Precio 2'},
+              // Agrega los servicios que desees mostrar
+            ],
+            paymentMethod: 'Método de pago',
+            verified: true, // Cambia a false si no está verificado
           ),
         );
       },
     );
-  }
-
-  Future<void> _obtenerReserva(String usuario) async {
-    Reserva reserva = await _reservasServices.getReservaById(usuario);
-    _mostrarTarjeta(context, reserva);
   }
 
   @override
@@ -125,10 +124,10 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: ListTile(
+                      //onTap: () => print('${horario.peluquero}'),
                       onTap: () {
                         print('${horario.peluquero}');
-                        //String usuario = obtenerUsuario(); // Debes implementar esta función para obtener el ID del usuario
-                        _obtenerReserva(usuario);
+                        _mostrarTarjeta(context);
                       },
                       title: Text('${horario.toMap()["horario"]}'),
                     ),
@@ -143,7 +142,7 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
           runSpacing: 16,
           children: [
             for (int i = 0; i <= 2; i++) ...[
-              TimeButton(
+              BotonHora(
                 label: '${i.toString().padLeft(2, '0')}:00',
                 value: i,
                 timeSelected: 1,
@@ -156,4 +155,4 @@ class _CalendarReservationsTestState extends State<CalendarReservationsTest> {
       ],
     );
   }
-}
+}*/
