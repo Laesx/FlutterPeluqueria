@@ -7,6 +7,13 @@ import 'package:flutter_peluqueria/models/models.dart';
 import '../services/horarios_services.dart';
 
 class CalendarScreen extends StatefulWidget {
+  static bool _isDataLoaded = false;
+
+  static bool get isDataLoaded => _isDataLoaded;
+  static set isDataLoaded(bool value) {
+    _isDataLoaded = value;
+  }
+
   Horario getOldHorario() {
     return _CalendarScreenState.getOldHorario();
   }
