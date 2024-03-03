@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_peluqueria/services/reservas_services.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_peluqueria/models/models.dart';
 import '../utils.dart';
@@ -22,6 +23,8 @@ class _CalendarReservationsState extends State<CalendarReservations> {
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
 
+  late ReservasServices reservasServices;
+
   @override
   void initState() {
     super.initState();
@@ -39,7 +42,24 @@ class _CalendarReservationsState extends State<CalendarReservations> {
   List<Event> _getEventsForDay(DateTime day) {
     // Implementation example
     return kEvents[day] ?? [];
+    //return ReservasServices().getReservasByDate(day);
   }
+
+/*
+  Future<List<Event>> _getEventsForDay(DateTime day) async {
+    // Obtener las reservas para el día seleccionado
+    List<Reserva> reservas = await ReservasServices().getReservasByDate(day);
+
+    // Convertir las reservas en eventos
+    List<Event> eventos = reservas.map((reserva) {
+      // Aquí debes definir cómo convertir cada reserva en un evento
+      // Por ejemplo:
+      return Event("Cita ${reserva.fecha}");
+    }).toList();
+
+    return eventos;
+  }
+  */
 
   List<Event> _getEventsForRange(DateTime start, DateTime end) {
     // Implementation example
@@ -82,7 +102,7 @@ class _CalendarReservationsState extends State<CalendarReservations> {
       _selectedEvents.value = _getEventsForDay(end);
     }
   }
-
+/*
   void _mostrarTarjeta(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -107,6 +127,58 @@ class _CalendarReservationsState extends State<CalendarReservations> {
         );
       },
     );
+  }
+*/
+/*
+  void _mostrarTarjeta(BuildContext context) {
+    String jsonReserva = '''
+  {
+    "cancelada": false,
+    "fecha": ["2024-09-02T17:30:00.000Z"],
+    "pagada": true,
+    "pago": "tarjeta",
+    "peluquero": "test",
+    "servicios": {
+      "SER001": "20",
+      "SER002": "12"
+    },
+    "usuario": "USR0012"
+  }
+''';
+
+    Reserva reserva = Reserva.fromJson(jsonReserva);
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          child: ReservaCard(
+            reserva: reserva,
+          ),
+        );
+      },
+    );
+  }
+*/
+
+  void _mostrarTarjeta(BuildContext context) async {
+    // Obtener las reservas para la fecha seleccionada
+    List<Reserva> reservas = await ReservasServices().loadReservas();
+
+    if (reservas.isNotEmpty) {
+      showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            padding: const EdgeInsets.all(16.0),
+            child: ReservaCard(
+              reserva: reservas[1],
+            ),
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -147,9 +219,9 @@ class _CalendarReservationsState extends State<CalendarReservations> {
         Expanded(
           child: ValueListenableBuilder<List<Event>>(
             valueListenable: _selectedEvents,
-            builder: (context, value, _) {
+            builder: (context, reserva, _) {
               return ListView.builder(
-                itemCount: value.length,
+                itemCount: reserva.length,
                 itemBuilder: (context, index) {
                   return Container(
                     margin: const EdgeInsets.symmetric(
@@ -162,10 +234,10 @@ class _CalendarReservationsState extends State<CalendarReservations> {
                     ),
                     child: ListTile(
                       onTap: () {
-                        print('${value[index]}');
+                        print('${reserva[index]}');
                         _mostrarTarjeta(context);
                       },
-                      title: Text('${value[index]}'),
+                      title: Text('${reserva[index]}'),
                     ),
                   );
                 },
