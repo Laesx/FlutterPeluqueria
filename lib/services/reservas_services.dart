@@ -27,12 +27,13 @@ class ReservasServices extends ChangeNotifier {
 
     reservasMap.forEach((key, value) {
       final tempReserva = Reserva.fromMap(value);
-      tempReserva.usuario = key;
+      tempReserva.id = key;
       reservas.add(tempReserva);
     });
 
     isLoading = false;
     notifyListeners();
+    //print('Reservas cargadas $reservas');
 
     return reservas;
   }
@@ -58,7 +59,7 @@ class ReservasServices extends ChangeNotifier {
 
     reservasMap.forEach((key, value) {
       final tempReserva = Reserva.fromMap(value);
-      tempReserva.usuario = key;
+      tempReserva.id = key;
       reservas.add(tempReserva);
     });
 

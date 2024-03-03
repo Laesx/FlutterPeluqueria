@@ -17,7 +17,7 @@ class CalendarioPeluquero extends StatefulWidget {
 }
 
 class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
-  late ValueNotifier<List<String>> _selectedSchedule;
+  late ValueNotifier<List<BotonHora>> _selectedSchedule;
   final CalendarFormat _calendarFormat = CalendarFormat.week;
   final RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.disabled;
 
@@ -42,7 +42,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
 
     usuarioActivo = Provider.of<ConnectedUserProvider>(context).activeUser;
     //_selectedSchedule = ValueNotifier(_horarioDia(_getScheduleForDay(_selectedDay!), _selectedDay!));
-    _selectedSchedule = ValueNotifier(_getHorarioPeluString(_selectedDay!));
+    _selectedSchedule = ValueNotifier(_getHorarioPelu(_selectedDay!));
   }
 
   @override
@@ -51,22 +51,18 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     super.dispose();
   }
 
-  // TODO Por implementar
-  // La idea es que luego el _getHorarioPeluString
-  // llame a esta funcion y devuelva botones u otra cosa que no sea solo texto
+  // Devuelve una lista con todas las reservas que tiene el peluquero activo en un día concreto
   List<Reserva> _getReservasPorDia(DateTime day) {
     List<Reserva> reservas = [];
-
-    Future<List<Reserva>> reservasDia = reservasServices.getReservasByDate(day);
+    // Copia de las reservas para debuggear
+    reservas.addAll(reservasServices.reservas);
 
     // Comprueba que sea el peluquero activo el que tiene la reserva
-    reservasDia.then((value) {
-      for (var reserva in value) {
-        if (reserva.peluquero == usuarioActivo.id) {
-          reservas.add(reserva);
-        }
-      }
-    });
+    reservas.removeWhere((reserva) =>
+        reserva.peluquero != usuarioActivo.id ||
+        reserva.fecha[0].day != day.day ||
+        reserva.fecha[0].month != day.month ||
+        reserva.fecha[0].year != day.year);
 
     return reservas;
   }
@@ -121,6 +117,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     return horario;
   }
 
+  // Esta función devuelve una lista de BotonHora con todas las horas que el peluquero no tiene ocupadas
   List<BotonHora> _getHorarioPelu(DateTime day) {
     List<BotonHora> horario = [];
     Map<String, dynamic> horarioMapa = {};
@@ -160,6 +157,10 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     });
 
     List<Reserva> reservas = _getReservasPorDia(day);
+
+    //print(reservas.toString());
+
+    //List<Reserva> reservas = reservasServices.reservas;
     List<String> horarioString = [];
 
     horarioMapa.forEach((key, value) {
@@ -278,7 +279,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
       });
-      _selectedSchedule.value = _getHorarioPeluString(_selectedDay!);
+      _selectedSchedule.value = _getHorarioPelu(_selectedDay!);
       // Limpia la selección de hora al cambiar de día
       lastSelection = null;
     }
@@ -305,7 +306,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
 
     return Column(
       children: [
-        TableCalendar<Dia>(
+        TableCalendar<BotonHora>(
           locale: 'es_ES',
           firstDay: kFirstDay,
           lastDay: kLastDay,
@@ -324,7 +325,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
           },
         ),
         const SizedBox(height: 20.0),
-        ValueListenableBuilder<List<String>>(
+        ValueListenableBuilder<List<BotonHora>>(
             valueListenable: _selectedSchedule,
             builder: (context, dia, _) {
               return Wrap(
@@ -332,17 +333,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
                 runSpacing: 8.0,
                 children: [
                   for (int i = 0; i < dia.length; i++) ...[
-                    BotonHora(
-                      enabledTimes: null,
-                      label: dia[i],
-                      value: i,
-                      timeSelected: lastSelection,
-                      // Esto es lo que se ejecuta al seleccionar una hora
-                      onPressed: (timeSelected) {
-                        onTimePressed(timeSelected);
-                      },
-                      singleSelection: true,
-                    ),
+                    dia[i],
                   ],
                 ],
               );

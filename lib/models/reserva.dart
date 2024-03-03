@@ -8,6 +8,7 @@ class Reserva {
   String peluquero;
   Map<String, bool> servicios;
   String usuario;
+  String? id;
 
   Reserva({
     required this.cancelada,
@@ -17,6 +18,7 @@ class Reserva {
     required this.peluquero,
     required this.servicios,
     required this.usuario,
+    this.id,
   });
 
   factory Reserva.fromJson(String str) => Reserva.fromMap(json.decode(str));
