@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/models/usuario.dart';
-import 'package:flutter_peluqueria/screens/usuarios.dart';
+import 'package:flutter_peluqueria/services/usuarios_services.dart';
+import 'package:flutter_peluqueria/widgets/usuarios.dart';
 
 class GestionPeluquerosScreen extends StatefulWidget {
   @override
@@ -24,7 +25,7 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Buscar por nombre, apellidos o teléfono',
               ),
               onChanged: (query) {
@@ -45,7 +46,7 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
     );
   }
 
-  List<Peluquero> filtrarPeluqueros(String query) {
+  List<Usuario> filtrarPeluqueros(String query) {
     query = query.toLowerCase();
     return peluqueros.where((peluquero) {
       final nombreCompleto =
@@ -55,7 +56,9 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
     }).toList();
   }
 
-  void _mostrarDetallesPeluquero(Peluquero peluquero) {
+  Future<void> _mostrarDetallesPeluquero(Usuario peluquero) async {
+    List<Usuario> peluqueros = await UsuariosServices().loadPeluqueros();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -80,16 +83,4 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
       },
     );
   }
-}
-
-class Peluquero {
-  final String nombre;
-  final String apellidos;
-  final String telefono;
-
-  Peluquero({
-    required this.nombre,
-    required this.apellidos,
-    required this.telefono,
-  });
 }

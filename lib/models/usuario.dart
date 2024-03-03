@@ -21,6 +21,8 @@ class Usuario {
 
   factory Usuario.fromJson(String str) => Usuario.fromMap(json.decode(str));
 
+  get apellidos => null;
+
   String toJson() => json.encode(toMap());
 
   factory Usuario.fromMap(Map<String, dynamic> json) => Usuario(
