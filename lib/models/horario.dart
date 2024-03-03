@@ -167,7 +167,21 @@ class Horario {
     return festivos;
   }
 
+  void setDiasFestivos(List<DateTime> dias) {
+    festivos = dias;
+  }
+
   List<Dia> getDiasSemana() {
     return [lunes, martes, miercoles, jueves, viernes, sabado, domingo];
+  }
+
+  void setDiasSemana(List<Dia> dias) {
+    lunes = dias[0];
+    martes = dias[1];
+    miercoles = dias[2];
+    jueves = dias[3];
+    viernes = dias[4];
+    sabado = dias[5];
+    domingo = dias[6];
   }
 }

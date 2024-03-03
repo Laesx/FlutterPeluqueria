@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import './hours_screen.dart';
@@ -8,14 +6,14 @@ import '../services/horarios_services.dart';
 
 class CalendarScreen extends StatefulWidget {
   static bool _isDataLoaded = false;
-
+  //Para manejar el estado de la pantalla de horas en la pantalla hours_screen.dart
   static bool get isDataLoaded => _isDataLoaded;
   static set isDataLoaded(bool value) {
     _isDataLoaded = value;
   }
 
-  Horario getOldHorario() {
-    return _CalendarScreenState.getOldHorario();
+  static List<DateTime> getClosedDays() {
+    return _CalendarScreenState.getClosedDays();
   }
 
   @override
@@ -23,82 +21,85 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  List<Horario> oldHorario = [];
+  late List<Horario> oldHorario;
   static Horario horario = Horario.empty();
-
-  bool horarioLoaded = false;
-  // Create instances of OpeningCalendar and OpeningHours
-  late OpeningCalendar openingCalendar;
+  Future? _loadHorariosFuture;
+  static late OpeningCalendar openingCalendar;
 
   @override
   void initState() {
     super.initState();
-    loadHorarios();
-    // Initialize the OpeningCalendar and OpeningHours instances
-    openingCalendar = OpeningCalendar();
+    _loadHorariosFuture = loadHorarios();
   }
 
-  //Nse pk
-  void loadHorarios() async {
+  Future loadHorarios() async {
     oldHorario = await HorariosServices().loadHorarioPelu();
     horario = oldHorario[0];
+    openingCalendar = OpeningCalendar();
+    openingCalendar.setClosedDays(horario.festivos); // Set the closed days here
   }
 
-  static Horario getOldHorario() {
-    return horario;
+  static List<DateTime> getClosedDays() {
+    return openingCalendar.getClosedDays();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Calendario y Horario de Apertura'),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Load the horarios
-          //Showing the info from oldHorario
-          openingCalendar,
-          // Use the OpeningCalendar instance
-          // Use the OpeningHours instance
-          ElevatedButton(
-              onPressed: () {
-                Horario.showInfo(horario);
-                print(horario.festivos);
-                openingCalendar.setClosedDays(horario.festivos);
-              },
-              child: Text('Leer datos')),
-          // Botón para guardar cambios
-          ElevatedButton(
-            onPressed: () {
-              // Get the closed days and opening hours from the instances
-              List<DateTime> closedDays = openingCalendar.getClosedDays();
-              // print the closed days and opening hours
-              // Save the closed days and opening hours to a file
-              if (OpeningCalendar.pushed()) {
-                List<Dia> dias = OpeningHoursManager().getDaysOfWeek();
+    return FutureBuilder(
+        future: _loadHorariosFuture,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator(); // Show a loading spinner while waiting for the data
+          } else if (snapshot.hasError) {
+            return Text(
+                'Error: ${snapshot.error}'); // Show an error message if something went wrong
+          } else {
+            // The data has loaded, you can build your widget here
+            return Scaffold(
+              appBar: AppBar(
+                title: Text('Calendario y Horario de Apertura'),
+              ),
+              body: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Load the horarios
+                  //Showing the info from oldHorario
+                  openingCalendar,
 
-                Horario newHorario = Horario(
-                  festivos: closedDays,
-                  lunes: dias[0],
-                  martes: dias[1],
-                  miercoles: dias[2],
-                  jueves: dias[3],
-                  viernes: dias[4],
-                  sabado: dias[5],
-                  domingo: dias[6],
-                );
-                HorariosServices().saveHorarioPelu(newHorario);
-              } else {
-                HorariosServices().saveHorarioPelu(horario);
-              }
-            },
-            child: Text('Guardar man'),
-          ),
-        ],
-      ),
-    );
+                  ElevatedButton(
+                      onPressed: () {
+                        // Get the closed days
+                        //print the closed days and opening hours
+                        print(openingCalendar.getClosedDays());
+                      },
+                      child: Text('Print closed days')),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      List<DateTime> oldClosedDays = horario.festivos;
+                      // Get the closed days and opening hours from the instances
+                      List<DateTime> closedDays =
+                          openingCalendar.getClosedDays();
+
+                      if (oldClosedDays != closedDays) {
+                        horario.setDiasFestivos(closedDays);
+                      }
+                      // print the closed days and opening hours
+                      // Save the closed days and opening hours to a file
+                      if (OpeningCalendar.pushed()) {
+                        List<Dia> dias = OpeningHoursManager().getDaysOfWeek();
+                        horario.setDiasSemana(dias);
+                      }
+
+                      HorariosServices().saveHorarioPelu(horario);
+                    },
+                    child: Text('Guardar man'),
+                  ),
+                ],
+              ),
+            );
+          }
+        });
   }
 }
 
@@ -106,6 +107,8 @@ class OpeningCalendar extends StatefulWidget {
   final Map<DateTime, List<String>> openingCalendar = {};
   final Function(Map<DateTime, List<String>> calendar) onSaveChanges =
       (calendar) {};
+
+  static List<DateTime> closedDays = [];
 
   OpeningCalendar({
     Key? key,
@@ -119,15 +122,9 @@ class OpeningCalendar extends StatefulWidget {
   _OpeningCalendarState createState() => _OpeningCalendarState();
 
   List<DateTime> getClosedDays() {
-    List<DateTime> closedDays = [];
     openingCalendar.forEach((day, status) {
       if (status.contains('Closed')) {
         closedDays.add(day);
-      } else {
-        if (day.weekday == DateTime.saturday ||
-            day.weekday == DateTime.sunday) {
-          closedDays.add(day);
-        }
       }
     });
     return closedDays;
@@ -136,15 +133,10 @@ class OpeningCalendar extends StatefulWidget {
   void setClosedDays(List<DateTime> closedDays) {
     openingCalendar.clear(); // Clear the existing map
 
-    // Iterate over all days of the week
-    for (int i = 0; i < 7; i++) {
-      // Get the date for the current day
-      DateTime day = DateTime.now().add(Duration(days: i));
-
-      // If the day is in the list of closed days, set its status to 'Closed'
-      if (closedDays.any((closedDay) => closedDay.weekday == day.weekday)) {
-        openingCalendar[day] = ['Closed'];
-      }
+    // Iterate over all closed days
+    for (DateTime closedDay in closedDays) {
+      // Set the status of the closed day to 'Closed'
+      openingCalendar[closedDay] = ['Closed'];
     }
   }
 }
@@ -152,6 +144,8 @@ class OpeningCalendar extends StatefulWidget {
 class _OpeningCalendarState extends State<OpeningCalendar> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   static bool pulsado = false;
+
+  static List<DateTime> closedDays = CalendarScreen.getClosedDays();
 
   static bool pushed() {
     return pulsado;
@@ -184,14 +178,6 @@ class _OpeningCalendarState extends State<OpeningCalendar> {
                 _calendarFormat = format;
               });
             },
-            weekendDays: [DateTime.saturday, DateTime.sunday],
-            daysOfWeekStyle: DaysOfWeekStyle(
-              weekendStyle: TextStyle(color: Colors.red),
-            ),
-            calendarStyle: CalendarStyle(
-              weekendTextStyle: TextStyle(color: Colors.red),
-            ),
-            //Para no poder seleccionar el finde
             selectedDayPredicate: (day) {
               if (day.weekday == DateTime.saturday ||
                   day.weekday == DateTime.sunday) {
@@ -201,8 +187,14 @@ class _OpeningCalendarState extends State<OpeningCalendar> {
             },
             calendarBuilders: CalendarBuilders(
               defaultBuilder: (context, day, _) {
-                if (widget.openingCalendar.containsKey(day) &&
-                    widget.openingCalendar[day]!.contains('Closed')) {
+                DateTime dayOnly = DateTime(day.year, day.month, day.day);
+
+                if (closedDays.any((closedDay) {
+                  DateTime closedDayOnly =
+                      DateTime(closedDay.year, closedDay.month, closedDay.day);
+                  return closedDayOnly == dayOnly;
+                })) {
+                  print('Day is in closedDays: $day'); // Debug print
                   return Container(
                     margin: const EdgeInsets.all(4.0),
                     padding: const EdgeInsets.only(top: 5.0),
@@ -213,6 +205,21 @@ class _OpeningCalendarState extends State<OpeningCalendar> {
                     ),
                   );
                 }
+                if (widget.openingCalendar.containsKey(day) &&
+                    widget.openingCalendar[day]!.contains('Closed')) {
+                  print(
+                      'Day is in openingCalendar and marked as Closed: $day'); // Debug print
+                  return Container(
+                    margin: const EdgeInsets.all(4.0),
+                    padding: const EdgeInsets.only(top: 5.0),
+                    alignment: Alignment.center,
+                    child: Text(
+                      day.day.toString(),
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  );
+                }
+                return null;
               },
             ),
             onDaySelected: (selectedDay, focusedDay) {
