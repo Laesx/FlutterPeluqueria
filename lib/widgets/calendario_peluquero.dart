@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/models/models.dart';
-import 'package:flutter_peluqueria/models/usuario.dart';
 import 'package:flutter_peluqueria/services/services.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../providers/providers.dart';
 import '../utils.dart';
 import 'package:provider/provider.dart';
-
 import 'boton_hora.dart';
 
 class CalendarioPeluquero extends StatefulWidget {
@@ -17,7 +15,7 @@ class CalendarioPeluquero extends StatefulWidget {
 }
 
 class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
-  late ValueNotifier<List<BotonHora>> _selectedSchedule;
+  late ValueNotifier<List<DatosBotonHora>> _selectedSchedule;
   final CalendarFormat _calendarFormat = CalendarFormat.week;
   final RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.disabled;
 
@@ -41,7 +39,6 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     horariosServices = Provider.of<HorariosServices>(context);
 
     usuarioActivo = Provider.of<ConnectedUserProvider>(context).activeUser;
-    //_selectedSchedule = ValueNotifier(_horarioDia(_getScheduleForDay(_selectedDay!), _selectedDay!));
     _selectedSchedule = ValueNotifier(_getHorarioPelu(_selectedDay!));
   }
 
@@ -67,59 +64,37 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     return reservas;
   }
 
-  // Esta función devuelve una lista con todas las horas que está abierta
-  // la peluqueria en un día concreto
-  List<String> _getHorarioPeluString(DateTime day) {
-    List<String> horario = [];
-    Map<String, dynamic> horarioMapa = {};
-
-    // Esto creo que no hace falta
-    if (reservasServices.isLoading || horariosServices.isLoading) {
-      // Return a default Horario object or handle it accordingly
-      return horario; // Assuming Horario has a default constructor
-    }
-
-    // Esto es para comprobar si el día es festivo, primero de los festivos de la peluqueria
+  bool _isFestivo(DateTime day) {
+    bool esFestivo = false;
     for (var horarioPelu in horariosServices.horarioPelu) {
       for (var festivo in horarioPelu.festivos) {
         if (festivo.day == day.day &&
             festivo.month == day.month &&
             festivo.year == day.year) {
-          return horario;
+          esFestivo = true;
         }
       }
     }
 
-    // Ahora los festivos del peluquero en si
     for (var horarioPeluquero in horariosServices.horarios) {
       if (horarioPeluquero.peluquero == usuarioActivo.id) {
         for (var festivo in horarioPeluquero.horario.festivos) {
           if (festivo.day == day.day &&
               festivo.month == day.month &&
               festivo.year == day.year) {
-            return horario;
+            esFestivo = true;
           }
         }
       }
     }
 
-    horariosServices.horarioPelu.forEach((horarioPelu) {
-      horarioMapa = horarioPelu.toMap();
-    });
-
-    horarioMapa.forEach((key, value) {
-      if (key == diaSemana(day)) {
-        horario.addAll(getTimes(value['empieza_man'], value['acaba_man']));
-        horario.addAll(getTimes(value['empieza_tarde'], value['acaba_tarde']));
-      }
-    });
-    //print(horario.toString());
-    return horario;
+    return esFestivo;
   }
 
-  // Esta función devuelve una lista de BotonHora con todas las horas que el peluquero no tiene ocupadas
-  List<BotonHora> _getHorarioPelu(DateTime day) {
-    List<BotonHora> horario = [];
+  // Esta función devuelve una lista de DatosBotonHora con todos los datos
+  // de las horas disponibles y ocupadas
+  List<DatosBotonHora> _getHorarioPelu(DateTime day) {
+    List<DatosBotonHora> horario = [];
     Map<String, dynamic> horarioMapa = {};
 
     // Esto creo que no hace falta
@@ -128,28 +103,9 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
       return horario; // Assuming Horario has a default constructor
     }
 
-    // Esto es para comprobar si el día es festivo, primero de los festivos de la peluqueria
-    for (var horarioPelu in horariosServices.horarioPelu) {
-      for (var festivo in horarioPelu.festivos) {
-        if (festivo.day == day.day &&
-            festivo.month == day.month &&
-            festivo.year == day.year) {
-          return horario;
-        }
-      }
-    }
-
-    // Ahora los festivos del peluquero en si
-    for (var horarioPeluquero in horariosServices.horarios) {
-      if (horarioPeluquero.peluquero == usuarioActivo.id) {
-        for (var festivo in horarioPeluquero.horario.festivos) {
-          if (festivo.day == day.day &&
-              festivo.month == day.month &&
-              festivo.year == day.year) {
-            return horario;
-          }
-        }
-      }
+    // Comprobar si el día es festivo
+    if (_isFestivo(day)) {
+      return horario;
     }
 
     horariosServices.horarioPelu.forEach((horarioPelu) {
@@ -157,10 +113,6 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     });
 
     List<Reserva> reservas = _getReservasPorDia(day);
-
-    //print(reservas.toString());
-
-    //List<Reserva> reservas = reservasServices.reservas;
     List<String> horarioString = [];
 
     horarioMapa.forEach((key, value) {
@@ -171,8 +123,6 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
             .addAll(getTimes(value['empieza_tarde'], value['acaba_tarde']));
       }
     });
-
-    //List<int> horasOcupadas = [];
 
     // Comprobamos las horas ocupadas
     for (int i = 0; i < horarioString.length; i++) {
@@ -186,34 +136,10 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
           ocupada = true;
         }
       }
-      horario.add(BotonHora(
-        enabledTimes: null,
-        label: hora,
-        value: i,
-        timeSelected: lastSelection,
-        onPressed: (timeSelected) {
-          onTimePressed(timeSelected);
-        },
-        singleSelection: true,
-        disabled: ocupada,
-      ));
+      horario.add(DatosBotonHora(hora, ocupada));
     }
     //print(horario.toString());
     return horario;
-  }
-
-  // Funcion para cuando se pulsa una hora
-  onTimePressed(timeSelected) {
-    //print(timeSelected.toString());
-    //print(lastSelection);
-    setState(() {
-      if (lastSelection == timeSelected) {
-        lastSelection = null;
-      } else {
-        lastSelection = timeSelected;
-      }
-    });
-    //print(lastSelection);
   }
 
   // Esta funcion es para parsear el tiempo en strings...
@@ -306,7 +232,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
 
     return Column(
       children: [
-        TableCalendar<BotonHora>(
+        TableCalendar<DatosBotonHora>(
           locale: 'es_ES',
           firstDay: kFirstDay,
           lastDay: kLastDay,
@@ -319,26 +245,89 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
           calendarStyle: const CalendarStyle(
             outsideDaysVisible: false,
           ),
+          headerStyle: const HeaderStyle(
+            titleCentered: true,
+          ),
           onDaySelected: _onDaySelected,
           onPageChanged: (focusedDay) {
             _focusedDay = focusedDay;
           },
         ),
         const SizedBox(height: 20.0),
-        ValueListenableBuilder<List<BotonHora>>(
+        ValueListenableBuilder<List<DatosBotonHora>>(
             valueListenable: _selectedSchedule,
             builder: (context, dia, _) {
-              return Wrap(
-                spacing: 8.0,
-                runSpacing: 8.0,
+              if (dia.isEmpty) {
+                return Container(
+                    padding: const EdgeInsets.all(30.0),
+                    decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 15,
+                            offset: Offset(0, 5),
+                          )
+                        ]),
+                    child: const Text(
+                      'Hoy no tienes que trabajar!!',
+                      style: TextStyle(color: Colors.white, fontSize: 20.0),
+                    ));
+              }
+              return Column(
                 children: [
-                  for (int i = 0; i < dia.length; i++) ...[
-                    dia[i],
-                  ],
+                  Wrap(
+                    spacing: 20.0,
+                    runSpacing: 60.0,
+                    children: [
+                      for (int i = 0; i < dia.length; i++) ...[
+                        BotonHora(
+                          enabledTimes: null,
+                          disabled: dia[i].ocupada,
+                          label: dia[i].hora,
+                          value: i,
+                          timeSelected: lastSelection,
+                          // Esto es lo que se ejecuta al seleccionar una hora
+                          onPressed: (timeSelected) {
+                            onTimePressed(timeSelected);
+                          },
+                          singleSelection: true,
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 50.0),
+                  // Cuando el dia no está vacio, muestra el botón de siguiente
+                  if (dia.isNotEmpty)
+                    // Pequeña animación para que no aparezca de golpe
+                    AnimatedOpacity(
+                      opacity: lastSelection != null ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 150),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.black,
+                          padding: EdgeInsets.symmetric(horizontal: 100),
+                        ),
+                        onPressed: () {
+                          // El boton no hace nada
+                        },
+                        child:
+                            Text('Siguiente', style: TextStyle(fontSize: 18)),
+                      ),
+                    ),
                 ],
               );
             }),
       ],
     );
   }
+}
+
+class DatosBotonHora {
+  final String hora;
+  final bool ocupada;
+
+  DatosBotonHora(this.hora, this.ocupada);
 }
