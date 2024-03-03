@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_peluqueria/models/usuario.dart';
+import 'package:flutter_peluqueria/screens/usuarios.dart';
 
 class GestionPeluquerosScreen extends StatefulWidget {
   @override
@@ -7,7 +9,9 @@ class GestionPeluquerosScreen extends StatefulWidget {
 }
 
 class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
-  List<Peluquero> peluqueros = []; //  lista de peluqueros de la base de datos
+  List<Usuario> usuarios = [];
+  
+  get peluqueros => null; // Cambié el tipo de datos a Usuario
 
   @override
   Widget build(BuildContext context) {
@@ -24,24 +28,15 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
                 labelText: 'Buscar por nombre, apellidos o teléfono',
               ),
               onChanged: (query) {
-                setState(() {
-                  peluqueros = filtrarPeluqueros(query);
-                });
+                // Implementa la lógica de filtrado según tus necesidades
               },
             ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: peluqueros.length,
+              itemCount: usuarios.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(
-                      '${peluqueros[index].nombre} ${peluqueros[index].apellidos}'),
-                  subtitle: Text('${peluqueros[index].telefono}'),
-                  onTap: () {
-                    _mostrarDetallesPeluquero(peluqueros[index]);
-                  },
-                );
+                return UsuarioWidget(usuario: usuarios[index]);
               },
             ),
           ),
