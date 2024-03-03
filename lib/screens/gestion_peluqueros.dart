@@ -11,8 +11,24 @@ class GestionPeluquerosScreen extends StatefulWidget {
 
 class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
   List<Usuario> usuarios = [];
-  
-  get peluqueros => null; // Cambié el tipo de datos a Usuario
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsuarios(); // Llamamos al método en initState
+  }
+
+  Future<void> _loadUsuarios() async {
+    try {
+      List<Usuario> loadedUsuarios = await UsuariosServices().loadUsuarios();
+      setState(() {
+        usuarios = loadedUsuarios;
+      });
+    } catch (error) {
+      // Manejar cualquier error que pueda ocurrir durante la carga de usuarios
+      print('Error al cargar usuarios: $error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +41,7 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Buscar por nombre, apellidos o teléfono',
               ),
               onChanged: (query) {
@@ -34,53 +50,26 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: usuarios.length,
-              itemBuilder: (context, index) {
-                return UsuarioWidget(usuario: usuarios[index]);
+            child: FutureBuilder(
+              future: _loadUsuarios(), // Utilizamos _loadUsuarios() como future
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator(); // Muestra un indicador de carga mientras espera
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  return ListView.builder(
+                    itemCount: usuarios.length,
+                    itemBuilder: (context, index) {
+                      return UsuarioWidget(usuario: usuarios[index]);
+                    },
+                  );
+                }
               },
             ),
           ),
         ],
       ),
-    );
-  }
-
-  List<Usuario> filtrarPeluqueros(String query) {
-    query = query.toLowerCase();
-    return peluqueros.where((peluquero) {
-      final nombreCompleto =
-          '${peluquero.nombre} ${peluquero.apellidos}'.toLowerCase();
-      final telefono = peluquero.telefono.toLowerCase();
-      return nombreCompleto.contains(query) || telefono.contains(query);
-    }).toList();
-  }
-
-  Future<void> _mostrarDetallesPeluquero(Usuario peluquero) async {
-    List<Usuario> peluqueros = await UsuariosServices().loadPeluqueros();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Detalles del Peluquero'),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Nombre: ${peluquero.nombre} ${peluquero.apellidos}'),
-              Text('Teléfono: ${peluquero.telefono}'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Cierra el diálogo
-              },
-              child: Text('Cerrar'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
