@@ -112,7 +112,6 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
       horarioMapa = horarioPelu.toMap();
     });
 
-    List<Reserva> reservas = _getReservasPorDia(day);
     List<String> horarioString = [];
 
     horarioMapa.forEach((key, value) {
@@ -124,7 +123,26 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
       }
     });
 
+    // Esta sección es para comprobar las horas que tiene el peluquero
+    // para luego contrastarlas con las horas de la peluqueria en si.
+    List<String> horasPeluquero = [];
+    Map<String, dynamic> horarioPeluqueroMapa = horariosServices.horarios
+        .firstWhere((horario) => horario.peluquero == usuarioActivo.id)
+        .horario
+        .toMap();
+
+    horarioPeluqueroMapa.forEach((key, value) {
+      if (key == diaSemana(day)) {
+        horasPeluquero
+            .addAll(getTimes(value['empieza_man'], value['acaba_man']));
+        horasPeluquero
+            .addAll(getTimes(value['empieza_tarde'], value['acaba_tarde']));
+      }
+    });
+
+    List<Reserva> reservas = _getReservasPorDia(day);
     // Comprobamos las horas ocupadas
+    // (las horas en las que el peluquero tiene reservas o no trabaja)
     for (int i = 0; i < horarioString.length; i++) {
       var hora = horarioString[i];
       bool ocupada = false;
@@ -133,6 +151,11 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
                 ':' +
                 reserva.fecha[0].minute.toString().padLeft(2, '0') ==
             hora) {
+          ocupada = true;
+        }
+      }
+      if (horasPeluquero.isNotEmpty) {
+        if (!horasPeluquero.contains(hora)) {
           ocupada = true;
         }
       }
