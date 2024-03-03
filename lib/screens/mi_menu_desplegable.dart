@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_peluqueria/app_routes/app_routes.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MiMenuDesplegable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
-        children: <Widget>[
-          ListTile(
-            title: Text('Cerrar sesión'),
-            onTap: () {
-              // TODO: implementar la lógica de cerrar sesión
-              Navigator.pop(context);
-            },
-          ),
+      child: ListView.separated(
+          itemBuilder: (context, index) {
+            return ListTile(
+              leading: Icon(AppRoutes.menuOptions[index].icon),
+              title: Text(AppRoutes.menuOptions[index].name),
+              onTap: () {
+                // Otra forma de hacerlo para usar push en vez de pushNamed
+                // final route = MaterialPageRoute(builder: (context) {return const HomeScreen();});
+                Navigator.pushNamed(
+                    context, AppRoutes.menuOptions[index].route);
+              },
+            );
+          },
+          /*
           ListTile(
             title: Text('Contactar por WhatsApp'),
             onTap: () async {
@@ -31,44 +37,9 @@ class MiMenuDesplegable extends StatelessWidget {
               Navigator.pop(context);
             },
           ),
-          ListTile(
-            title: Text('Calendario y horario de apertura'),
-            onTap: () {
-              // Implementa la lógica del calendario y horario de apertura
-              String calendarioUrl = 'url_calendario_horarios';
-              launch(calendarioUrl);
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: Text('Gestión de peluqueros'),
-            onTap: () {
-              // Implementa la lógica de gestión de peluqueros
-              String gestionUrl = 'url_gestion_peluqueros';
-              launch(gestionUrl);
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: Text('Reservas'),
-            onTap: () {
-              // Implementa la lógica de reservas
-              String reservasUrl = 'url_reservas';
-              launch(reservasUrl);
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: Text('Comprobación de horarios'),
-            onTap: () {
-              // Implementa la lógica de comprobación de horarios
-              String horariosUrl = 'url_comprobacion_horarios';
-              launch(horariosUrl);
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
+          */
+          separatorBuilder: (context, index) => Divider(),
+          itemCount: AppRoutes.menuOptions.length),
     );
   }
 }

@@ -52,21 +52,22 @@ class _LoginForm extends StatelessWidget {
         await authService.login(loginForm.email, loginForm.password);
 
     if (errorMessage == null) {
-      // Almacenar usuario y contraseña localmente (puede que no sea muy seguro)
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('user', loginForm.email);
       prefs.setString('password', loginForm.password);
 
-      // Registrar usuario como usuario recién conectado (selecciona por email)
       Usuario? activeUser =
           await usuariosService.getUsuarioByEmail(loginForm.email);
-      print(activeUser?.toJson());
-      // Si el login es correcto, activeUser no va a ser nulo
-      conectadoProvider.activeUser = activeUser!;
 
-      Navigator.pushReplacementNamed(context, 'home');
+      // Verificar si activeUser es null antes de acceder a sus propiedades
+      if (activeUser != null) {
+        conectadoProvider.activeUser = activeUser;
+        Navigator.pushReplacementNamed(context, 'home');
+      } else {
+        // Manejar el caso donde activeUser es null
+        print("Error: No se pudo obtener el usuario activo.");
+      }
     } else {
-      // Mostrar error en la terminal
       print(errorMessage);
       showDialog(
         context: context,
@@ -143,7 +144,7 @@ class _LoginForm extends StatelessWidget {
           ),
           const SizedBox(height: 40),
           const Text(
-            "Bienvenido",
+            "Bienvenido a BarberShop Ali",
             style: TextStyle(fontSize: 16),
           ),
 
@@ -181,7 +182,7 @@ class _LoginForm extends StatelessWidget {
             validator: (value) {
               return (value != null && value.length >= 6)
                   ? null
-                  : "La contraseña debe tener al menos 6 caracteres";
+                  : "La contraseña debe tener como minimo 6 caracteres";
             },
           ),
 

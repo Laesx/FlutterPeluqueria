@@ -11,7 +11,15 @@ class HomeScreen extends StatelessWidget {
       appBar: MiAppBar(),
       drawer: MiMenuDesplegable(),
       body: Center(
-        child: Text('¡Bienvenido a mi app!'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const <Widget>[
+            Text(
+              'Bienvenido a la peluquería',
+              style: TextStyle(fontSize: 20),
+            ),
+          ],
+        ),
       ),
     );
   }
