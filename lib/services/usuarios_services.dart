@@ -18,7 +18,6 @@ class UsuariosServices extends ChangeNotifier {
 
   // TODO Falta Probar
   Future<List<Usuario>> loadUsuarios() async {
-    isLoading = true;
     notifyListeners();
 
     final url = Uri.https(_baseURL, 'usuarios.json');
@@ -26,14 +25,13 @@ class UsuariosServices extends ChangeNotifier {
 
     final Map<String, dynamic> usuariosMap = json.decode(resp.body);
 
+    this.usuarios.clear();
+
     usuariosMap.forEach((key, value) {
       final tempUser = Usuario.fromMap(value);
       tempUser.id = key;
       usuarios.add(tempUser);
     });
-
-    isLoading = false;
-    notifyListeners();
 
     return usuarios;
     //print(this.producto[1].nombre);
@@ -110,7 +108,12 @@ class UsuariosServices extends ChangeNotifier {
 
   Future<Usuario?> getUsuarioByEmail(String email) async {
     List<Usuario> users = await loadUsuarios();
-    return users.where((u) => u.email == email).firstOrNull;
+    var filteredUsers = users.where((u) => u.email == email);
+    if (filteredUsers.isNotEmpty) {
+      return filteredUsers.first;
+    } else {
+      return null;
+    }
   }
 
   Future<String> updateUsuario(Usuario usuario) async {
