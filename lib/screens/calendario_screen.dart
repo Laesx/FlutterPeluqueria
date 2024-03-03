@@ -12,6 +12,10 @@ class CalendarScreen extends StatefulWidget {
     _isDataLoaded = value;
   }
 
+  static bool getFestivoLoaded() {
+    return _CalendarScreenState.getFestivoLoaded();
+  }
+
   static List<DateTime> getClosedDays() {
     return _CalendarScreenState.getClosedDays();
   }
@@ -25,11 +29,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
   static Horario horario = Horario.empty();
   Future? _loadHorariosFuture;
   static late OpeningCalendar openingCalendar;
+  static bool festivosLoaded = false;
 
   @override
   void initState() {
     super.initState();
     _loadHorariosFuture = loadHorarios();
+  }
+
+  static bool getFestivoLoaded() {
+    return festivosLoaded;
   }
 
   Future loadHorarios() async {
@@ -70,27 +79,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       onPressed: () {
                         // Get the closed days
                         //print the closed days and opening hours
-                        print(openingCalendar.getClosedDays());
+                        print(_CalendarScreenState.getClosedDays());
                       },
                       child: Text('Print closed days')),
 
                   ElevatedButton(
                     onPressed: () {
                       List<DateTime> oldClosedDays = horario.festivos;
-                      // Get the closed days and opening hours from the instances
                       List<DateTime> closedDays =
                           openingCalendar.getClosedDays();
 
                       if (oldClosedDays != closedDays) {
                         horario.setDiasFestivos(closedDays);
                       }
-                      // print the closed days and opening hours
-                      // Save the closed days and opening hours to a file
+
                       if (OpeningCalendar.pushed()) {
                         List<Dia> dias = OpeningHoursManager().getDaysOfWeek();
                         horario.setDiasSemana(dias);
                       }
 
+                      // Only save once, after all changes have been made
                       HorariosServices().saveHorarioPelu(horario);
                     },
                     child: Text('Guardar man'),
@@ -122,11 +130,16 @@ class OpeningCalendar extends StatefulWidget {
   _OpeningCalendarState createState() => _OpeningCalendarState();
 
   List<DateTime> getClosedDays() {
+    List<DateTime> closedDays = [];
     openingCalendar.forEach((day, status) {
       if (status.contains('Closed')) {
         closedDays.add(day);
+        print('Festivo: $day ');
       }
     });
+
+    closedDays = closedDays.toSet().toList();
+    print('Festivosss: $closedDays');
     return closedDays;
   }
 
@@ -144,8 +157,8 @@ class OpeningCalendar extends StatefulWidget {
 class _OpeningCalendarState extends State<OpeningCalendar> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   static bool pulsado = false;
-
   static List<DateTime> closedDays = CalendarScreen.getClosedDays();
+  bool festivosLoaded = false;
 
   static bool pushed() {
     return pulsado;
@@ -189,12 +202,10 @@ class _OpeningCalendarState extends State<OpeningCalendar> {
               defaultBuilder: (context, day, _) {
                 DateTime dayOnly = DateTime(day.year, day.month, day.day);
 
-                if (closedDays.any((closedDay) {
-                  DateTime closedDayOnly =
-                      DateTime(closedDay.year, closedDay.month, closedDay.day);
-                  return closedDayOnly == dayOnly;
-                })) {
-                  print('Day is in closedDays: $day'); // Debug print
+                if (closedDays.contains(dayOnly) && !festivosLoaded) {
+                  setState(() {
+                    festivosLoaded = true;
+                  });
                   return Container(
                     margin: const EdgeInsets.all(4.0),
                     padding: const EdgeInsets.only(top: 5.0),
