@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_peluqueria/screens/gestion_peluqueros.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'screens/screens.dart';
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const ScheduleScreen(),
+      home: GestionPeluquerosScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
