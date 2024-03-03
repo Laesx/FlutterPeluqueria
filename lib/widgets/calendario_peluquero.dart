@@ -121,6 +121,100 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     return horario;
   }
 
+  List<BotonHora> _getHorarioPelu(DateTime day) {
+    List<BotonHora> horario = [];
+    Map<String, dynamic> horarioMapa = {};
+
+    // Esto creo que no hace falta
+    if (reservasServices.isLoading || horariosServices.isLoading) {
+      // Return a default Horario object or handle it accordingly
+      return horario; // Assuming Horario has a default constructor
+    }
+
+    // Esto es para comprobar si el día es festivo, primero de los festivos de la peluqueria
+    for (var horarioPelu in horariosServices.horarioPelu) {
+      for (var festivo in horarioPelu.festivos) {
+        if (festivo.day == day.day &&
+            festivo.month == day.month &&
+            festivo.year == day.year) {
+          return horario;
+        }
+      }
+    }
+
+    // Ahora los festivos del peluquero en si
+    for (var horarioPeluquero in horariosServices.horarios) {
+      if (horarioPeluquero.peluquero == usuarioActivo.id) {
+        for (var festivo in horarioPeluquero.horario.festivos) {
+          if (festivo.day == day.day &&
+              festivo.month == day.month &&
+              festivo.year == day.year) {
+            return horario;
+          }
+        }
+      }
+    }
+
+    horariosServices.horarioPelu.forEach((horarioPelu) {
+      horarioMapa = horarioPelu.toMap();
+    });
+
+    List<Reserva> reservas = _getReservasPorDia(day);
+    List<String> horarioString = [];
+
+    horarioMapa.forEach((key, value) {
+      if (key == diaSemana(day)) {
+        horarioString
+            .addAll(getTimes(value['empieza_man'], value['acaba_man']));
+        horarioString
+            .addAll(getTimes(value['empieza_tarde'], value['acaba_tarde']));
+      }
+    });
+
+    //List<int> horasOcupadas = [];
+
+    // Comprobamos las horas ocupadas
+    for (int i = 0; i < horarioString.length; i++) {
+      var hora = horarioString[i];
+      bool ocupada = false;
+      for (var reserva in reservas) {
+        if (reserva.fecha[0].hour.toString().padLeft(2, '0') +
+                ':' +
+                reserva.fecha[0].minute.toString().padLeft(2, '0') ==
+            hora) {
+          ocupada = true;
+        }
+      }
+      horario.add(BotonHora(
+        enabledTimes: null,
+        label: hora,
+        value: i,
+        timeSelected: lastSelection,
+        onPressed: (timeSelected) {
+          onTimePressed(timeSelected);
+        },
+        singleSelection: true,
+        disabled: ocupada,
+      ));
+    }
+    //print(horario.toString());
+    return horario;
+  }
+
+  // Funcion para cuando se pulsa una hora
+  onTimePressed(timeSelected) {
+    //print(timeSelected.toString());
+    //print(lastSelection);
+    setState(() {
+      if (lastSelection == timeSelected) {
+        lastSelection = null;
+      } else {
+        lastSelection = timeSelected;
+      }
+    });
+    //print(lastSelection);
+  }
+
   // Esta funcion es para parsear el tiempo en strings...
   // Devuelve algo así como ['08:00', '08:30', '09:00', '09:30', '10:00']
   List<String> getTimes(String startTime, String endTime) {

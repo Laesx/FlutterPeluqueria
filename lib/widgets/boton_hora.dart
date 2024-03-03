@@ -10,6 +10,7 @@ class BotonHora extends StatefulWidget {
     required this.onPressed,
     required this.singleSelection,
     required this.timeSelected,
+    this.disabled = false,
   }) : super(key: key);
 
   final List<int>? enabledTimes;
@@ -18,6 +19,7 @@ class BotonHora extends StatefulWidget {
   final ValueChanged<int> onPressed;
   final bool singleSelection;
   final int? timeSelected;
+  final bool? disabled;
 
   @override
   State<BotonHora> createState() => _BotonHoraState();
@@ -51,8 +53,8 @@ class _BotonHoraState extends State<BotonHora> {
     final buttonBorderColor =
         selected ? AppTheme.primaryColor : AppTheme.textColor;
 
-    final disableTime = widget.enabledTimes != null &&
-        !widget.enabledTimes!.contains(widget.value);
+    //final disableTime = widget.enabledTimes != null && !widget.enabledTimes!.contains(widget.value);
+    final disableTime = widget.disabled == true;
 
     if (disableTime) {
       buttonColor = Colors.grey[400]!;
