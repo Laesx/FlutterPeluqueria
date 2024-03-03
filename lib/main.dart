@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_peluqueria/app_routes/app_routes.dart';
 import 'package:flutter_peluqueria/widgets/calendario_peluquero.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
@@ -19,12 +20,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Peluqueria App',
-      initialRoute: 'login', // Utilizar home para realizar pruebas
-      routes: {
-        'login': (_) => LoginScreen(),
-        'home': (_) => HomeScreen(),
-        'horarios': (_) => CalendarioPeluquero(),
-      },
+      initialRoute:
+          AppRoutes.initialRoute, // Utilizar home para realizar pruebas
+      routes: AppRoutes.getAppRoutes(),
       theme: AppTheme.darkTheme,
       darkTheme: AppTheme.darkTheme, // TODO: Implementar tema oscuro
     );

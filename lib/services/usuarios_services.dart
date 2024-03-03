@@ -61,51 +61,6 @@ class UsuariosServices extends ChangeNotifier {
     return usuarios;
   }
 
-  // TODO Falta implementar
-  Future saveOrCreateUsuario(Usuario usuario) async {
-    isSaving = true;
-    notifyListeners();
-
-    //await this.updateProducto(producto);
-    if (usuario.id == null) {
-      // Crear la entrada
-      await createProducto(usuario);
-    } else {
-      // Update de la entrada
-      await updateProducto(usuario);
-    }
-
-    isSaving = false;
-    notifyListeners();
-  }
-
-  // TODO Falta implementar
-  Future<String> updateProducto(Usuario producto) async {
-    final url = Uri.https(_baseURL, 'productos/${producto.id}.json');
-    final resp = await http.put(url, body: producto.toJson());
-    final decodedData = resp.body;
-
-    print(decodedData);
-    final index =
-        this.usuarios.indexWhere((element) => element.id == producto.id);
-    this.usuarios[index] = producto;
-
-    return producto.id!;
-  }
-
-  // TODO Falta implementar
-  Future<String> createProducto(Usuario producto) async {
-    final url = Uri.https(_baseURL, 'productos.json');
-    final resp = await http.post(url, body: producto.toJson());
-    final decodedData = json.decode(resp.body);
-
-    producto.id = decodedData['name'];
-
-    this.usuarios.add(producto);
-
-    return producto.id!;
-  }
-
   Future<Usuario?> getUsuarioByEmail(String email) async {
     List<Usuario> users = await loadUsuarios();
     var filteredUsers = users.where((u) => u.email == email);
