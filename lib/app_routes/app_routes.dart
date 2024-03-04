@@ -31,6 +31,12 @@ class AppRoutes {
       screen: CalendarScreen(),
     ),
     MenuOption(
+      route: 'reservas',
+      icon: Icons.calendar_today,
+      name: 'Reservas',
+      screen: const ReservasScreen(),
+    ),
+    MenuOption(
       route: 'registro',
       icon: Icons.app_registration_outlined,
       name: 'Registro',
@@ -44,7 +50,7 @@ class AppRoutes {
       'schedule': (context) => const ScheduleScreen(),
       'gestion': (context) => GestionPeluquerosScreen(),
       'login': (context) => const LoginScreen(),
-      // 'reservas' : (context) => const ReservasScreen(),
+      'reservas': (context) => const ReservasScreen(),
       'horario': (context) => CalendarScreen(),
       'registro': (context) => const RegisterScreen(),
     };
