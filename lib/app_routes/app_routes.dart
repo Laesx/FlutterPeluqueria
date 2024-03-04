@@ -7,7 +7,7 @@ import '../screens/screens.dart';
 import '../screens/register_screen.dart';
 
 class AppRoutes {
-  static const initialRoute = 'gestion';
+  static const initialRoute = 'login';
 
   static final menuOptions = <MenuOption>[
     MenuOption(
