@@ -103,16 +103,35 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 appBar: MiAppBar(),
                 drawer: MiMenuDesplegable(),
                 body: Center(
-                  child: SingleChildScrollView(
+                    child: SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        Text(
+                          'Calendario de Apertura',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
                         TableCalendar(
                           firstDay: DateTime.utc(
                               DateTime.now().year, DateTime.now().month, 1),
                           lastDay: DateTime.utc(DateTime.now().year,
                               DateTime.now().month + 2, 31),
                           focusedDay: DateTime.now(),
+                          //Para los formatos
+                          calendarFormat: _calendarFormat,
+                          onFormatChanged: (format) {
+                            setState(() {
+                              _calendarFormat = format;
+                            });
+                          },
                           calendarBuilders: CalendarBuilders(
                             defaultBuilder: (context, date, events) {
                               DateTime dayOnly =
@@ -140,66 +159,74 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               }
                             },
                           ),
-                          //Para los formatos
-                          calendarFormat: _calendarFormat,
-                          onFormatChanged: (format) {
-                            setState(() {
-                              _calendarFormat = format;
-                            });
-                          },
+
                           onDaySelected: (selectedDay, focusedDay) {
                             showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text('Select Option'),
-                                content: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            CalendarScreen.openingCalendar
-                                                .remove(selectedDay);
-                                          });
-                                          print('Dia eliminado: $selectedDay');
-                                          festivosTotales = festivosTotales
-                                              .where((date) =>
-                                                  !isSameDay(date, selectedDay))
-                                              .toList();
-                                          Navigator.pop(context);
-                                        },
-                                        child: Text('Open'),
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                      title: Text('Selecciona una opcion'),
+                                      content: Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.8, // 80% of screen width
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.06,
+                                        child: Center(
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  setState(() {
+                                                    CalendarScreen
+                                                        .openingCalendar
+                                                        .remove(selectedDay);
+                                                  });
+                                                  print(
+                                                      'Dia eliminado: $selectedDay');
+                                                  festivosTotales =
+                                                      festivosTotales
+                                                          .where((date) =>
+                                                              !isSameDay(date,
+                                                                  selectedDay))
+                                                          .toList();
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text('Abierto'),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  setState(() {
+                                                    CalendarScreen
+                                                            .openingCalendar[
+                                                        selectedDay] = [
+                                                      'Closed'
+                                                    ];
+                                                  });
+                                                  if (!fechaIgual(selectedDay,
+                                                      festivosTotales)) {
+                                                    festivosTotales
+                                                        .add(selectedDay);
+                                                    festivosTotales =
+                                                        festivosTotales
+                                                            .toSet()
+                                                            .toList();
+                                                  }
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text('Cerrado'),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            CalendarScreen.openingCalendar[
-                                                selectedDay] = ['Closed'];
-                                          });
-                                          if (!fechaIgual(
-                                              selectedDay, festivosTotales)) {
-                                            festivosTotales.add(selectedDay);
-                                            festivosTotales = festivosTotales
-                                                .toSet()
-                                                .toList();
-                                          }
-                                          Navigator.pop(context);
-                                        },
-                                        child: Text('Close'),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
+                                    ));
                           },
                         ),
-                        ElevatedButton(
-                          onPressed: () {
-                            printFestivos();
-                          },
-                          child: Text('Mostrar festivos'),
+                        SizedBox(
+                          height: 80,
                         ),
                         ElevatedButton(
                           onPressed: () {
@@ -212,7 +239,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   builder: (context) => OpeningHoursManager()),
                             );
                           },
-                          child: Text('Open Calendar Manager'),
+                          child: Text('Abrir gestion horarios apertura'),
                         ),
                         ElevatedButton(
                           onPressed: () {
@@ -224,12 +251,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             horario.setDiasFestivos(festivosTotales);
                             HorariosServices().saveHorarioPelu(horario);
                           },
-                          child: Text('Save changes'),
+                          child: Text('Guardar todos los cambios'),
                         ),
                       ],
                     ),
                   ),
-                ));
+                )));
           }
         });
   }

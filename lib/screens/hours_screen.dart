@@ -62,6 +62,47 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
     }
   }
 
+  Future<bool> neededChange(BuildContext context, String dia) async {
+    if (_morningClosed[dia]! && _afternoonClosed[dia]!) {
+      bool? result = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Default hours for $dia'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text('Morning: 11:00 - 14:00'),
+                Text('Afternoon: 17:00 - 20:00'),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+              ),
+            ],
+          );
+        },
+      );
+
+      if (result == true) {
+        _morningOpeningTimes[dia] = TimeOfDay(hour: 11, minute: 0);
+        _morningClosingTimes[dia] = TimeOfDay(hour: 14, minute: 0);
+        _afternoonOpeningTimes[dia] = TimeOfDay(hour: 17, minute: 0);
+        _afternoonClosingTimes[dia] = TimeOfDay(hour: 20, minute: 0);
+        _morningClosed[dia] = false;
+        _afternoonClosed[dia] = false;
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   Future loadHorarios() async {
     oldHorario = await HorariosServices().loadHorarioPelu();
     if (oldHorario.isNotEmpty) {
@@ -172,6 +213,7 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
+        print('Mostrando menu?');
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
@@ -223,12 +265,11 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
                     onPressed: () {
                       TimeOfDay selectedTime =
                           TimeOfDay(hour: selectedHour, minute: selectedMinute);
-
                       if (isOpeningTime) {
                         if (isMorning) {
                           if (_morningClosingTimes[day] != null &&
                               compareTimeOfDay(selectedTime,
-                                      _morningClosingTimes[day]!) >=
+                                      _morningClosingTimes[day]!) >
                                   0) {
                             return;
                           }
@@ -241,7 +282,7 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
                           } else {
                             if (_afternoonClosingTimes[day] != null &&
                                 compareTimeOfDay(selectedTime,
-                                        _afternoonClosingTimes[day]!) >=
+                                        _afternoonClosingTimes[day]!) >
                                     0) {
                               return;
                             }
@@ -257,7 +298,7 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
                           } else {
                             if (_afternoonOpeningTimes[day] != null &&
                                 compareTimeOfDay(selectedTime,
-                                        _afternoonOpeningTimes[day]!) >=
+                                        _afternoonOpeningTimes[day]!) >
                                     0) {
                               return;
                             }
@@ -286,14 +327,18 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
           if (isOpeningTime) {
             if (isMorning) {
               _morningOpeningTimes[day] = selectedTime;
+              _morningClosed[day] = false;
             } else {
               _afternoonOpeningTimes[day] = selectedTime;
+              _afternoonClosed[day] = false;
             }
           } else {
             if (isMorning) {
               _morningClosingTimes[day] = selectedTime;
+              _morningClosed[day] = false;
             } else {
               _afternoonClosingTimes[day] = selectedTime;
+              _afternoonClosed[day] = false;
             }
           }
         });
@@ -326,7 +371,7 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
                           'Mañana: ${_morningClosed[day]! ? "cerrado" : "${_morningOpeningTimes[day]!.format24Hour(context)} - ${_morningClosingTimes[day]!.format24Hour(context)}"}\n'
                           'Tarde: ${_afternoonClosed[day]! ? "cerrado" : "${_afternoonOpeningTimes[day]!.format24Hour(context)} - ${_afternoonClosingTimes[day]!.format24Hour(context)}"}',
                         ),
-                        onTap: () {
+                        onTap: () async {
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -335,23 +380,27 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   ElevatedButton(
-                                    onPressed: () =>
-                                        _selectTime(context, day, true, true),
+                                    onPressed: () {
+                                      _selectTime(context, day, true, true);
+                                    },
                                     child: Text('Hora apertura mañana'),
                                   ),
                                   ElevatedButton(
-                                    onPressed: () =>
-                                        _selectTime(context, day, true, false),
+                                    onPressed: () {
+                                      _selectTime(context, day, true, false);
+                                    },
                                     child: Text('Hora cierre mañana'),
                                   ),
                                   ElevatedButton(
-                                    onPressed: () =>
-                                        _selectTime(context, day, false, true),
+                                    onPressed: () {
+                                      _selectTime(context, day, false, true);
+                                    },
                                     child: Text('Hora apertura tarde'),
                                   ),
                                   ElevatedButton(
-                                    onPressed: () =>
-                                        _selectTime(context, day, false, false),
+                                    onPressed: () {
+                                      _selectTime(context, day, false, false);
+                                    },
                                     child: Text('Hora cierre tarde'),
                                   ),
                                   ElevatedButton(
@@ -368,20 +417,31 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
                               ),
                             ),
                           );
+                          neededChange(context, day);
                         },
                       ),
                     );
                   },
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Horario.showInfo(horario);
-                  // Add your button functionality here
-                  Navigator.pop(context);
-                },
-                child: Text('Guardar cambios'),
-              ),
+              Column(
+                children: <Widget>[
+                  Card(
+                    child: ListTile(
+                      title: Text('Informacion horario por defecto'),
+                      subtitle:
+                          Text('Mañana: 11:00 - 14:00\nTarde: 17:00 - 20:00'),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Add your button functionality here
+                      Navigator.pop(context);
+                    },
+                    child: Text('Guardar cambios'),
+                  ),
+                ],
+              )
             ],
           );
         }
