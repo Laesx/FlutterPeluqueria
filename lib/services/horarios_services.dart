@@ -101,15 +101,11 @@ class HorariosServices extends ChangeNotifier {
     notifyListeners();
   }
 
-  // TODO Falta probar
   Future<String> updateHorario(HorarioPeluquero horarioPeluquero) async {
     final url = Uri.https(_baseURL, 'horarios/${horarioPeluquero.id}.json',
         {'auth': _firebaseToken});
     final resp = await http.put(url, body: horarioPeluquero.toJson());
     final decodedData = resp.body;
-
-    //TODO Print para prueba, esto hay que quitarlo
-    //print(decodedData);
     final index =
         horarios.indexWhere((element) => element.id == horarioPeluquero.id);
     horarios[index] = horarioPeluquero;
@@ -117,7 +113,6 @@ class HorariosServices extends ChangeNotifier {
     return horarioPeluquero.id!;
   }
 
-  // TODO Falta probar
   Future<String> createHorario(HorarioPeluquero horarioPeluquero) async {
     final url = Uri.https(_baseURL, 'horarios.json', {'auth': _firebaseToken});
     final resp = await http.post(url, body: horarioPeluquero.toJson());
