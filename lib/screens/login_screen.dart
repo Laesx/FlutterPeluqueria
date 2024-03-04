@@ -221,8 +221,7 @@ class _LoginForm extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () =>
-                      Navigator.pushReplacementNamed(context, 'register'),
+                  onTap: () => Navigator.pushNamed(context, 'registro'),
                   child: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10),
                     child: Text(
