@@ -10,15 +10,29 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: MiAppBar(),
       drawer: MiMenuDesplegable(),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const <Widget>[
-            Text(
-              'Bienvenido a la peluquería',
-              style: TextStyle(fontSize: 20),
-            ),
-          ],
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+                'assets/alithebarber.jpg'), // Ruta de tu imagen de fondo
+            fit: BoxFit
+                .fitWidth, // Ajusta la imagen para que el ancho de la imagen cubra el ancho del contenedor
+          ),
+        ),
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const <Widget>[
+              Padding(
+                padding: EdgeInsets.only(
+                    top: 20, left: 20), // Ajusta el espaciado como desees
+                child: Text(
+                  'Bienvenido a la peluquería',
+                  style: TextStyle(fontSize: 20, color: Colors.black),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
