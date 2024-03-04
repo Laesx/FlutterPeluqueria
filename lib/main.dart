@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/app_routes/app_routes.dart';
+import 'package:flutter_peluqueria/screens/register_screen.dart';
 import 'package:flutter_peluqueria/widgets/calendario_peluquero.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
@@ -38,7 +39,8 @@ class AppState extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => HorariosServices()),
         ChangeNotifierProvider(create: (context) => ReservasServices()),
         ChangeNotifierProvider(create: (context) => UsuariosServices()),
-        ChangeNotifierProvider(create: (context) => ConnectedUserProvider())
+        ChangeNotifierProvider(create: (context) => ConnectedUserProvider()),
+        ChangeNotifierProvider(create: (context) => RegisterFormProvider()),
       ],
       child: MyApp(),
     );

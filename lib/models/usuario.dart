@@ -5,8 +5,9 @@ class Usuario {
   String email;
   String genero;
   String nombre;
+  String apellido;
   String rol;
-  int telefono;
+  String telefono;
   bool verificado;
 
   Usuario({
@@ -14,6 +15,7 @@ class Usuario {
     required this.email,
     required this.genero,
     required this.nombre,
+    required this.apellido,
     required this.rol,
     required this.telefono,
     required this.verificado,
@@ -27,6 +29,7 @@ class Usuario {
         email: json["email"],
         genero: json["genero"],
         nombre: json["nombre"],
+        apellido: json["apellido"],
         rol: json["rol"],
         telefono: json["telefono"],
         verificado: json["verificado"],
@@ -36,6 +39,7 @@ class Usuario {
         "email": email,
         "genero": genero,
         "nombre": nombre,
+        "apellido": apellido,
         "rol": rol,
         "telefono": telefono,
         "verificado": verificado,
@@ -46,6 +50,7 @@ class Usuario {
         email: this.email,
         genero: this.genero,
         nombre: this.nombre,
+        apellido: this.apellido,
         rol: this.rol,
         telefono: this.telefono,
         verificado: this.verificado,

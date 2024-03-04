@@ -88,4 +88,10 @@ class UsuariosServices extends ChangeNotifier {
 
     return id;
   }
+
+  Future<String> saveUsuario(Usuario usuario) async {
+    final url = Uri.https(_baseURL, 'usuarios.json');
+    final resp = await http.post(url, body: usuario.toJson());
+    return resp.body;
+  }
 }

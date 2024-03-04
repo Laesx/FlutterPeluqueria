@@ -6,6 +6,7 @@ class RegisterFormProvider extends ChangeNotifier {
   String password = '';
   String genero = '';
   String nombre = '';
+  String apellido = '';
   String rol = 'usuario';
   String telefono = '';
   bool verificado = false;
