@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 class ReservasServices extends ChangeNotifier {
   final String _baseURL =
       'fl-peluqueria-27d72-default-rtdb.europe-west1.firebasedatabase.app';
+  final String _firebaseToken = 'B9KTDm0g3J9qAs1ZlQRt5veeHiIObJo5ZTVwzvzp';
   final List<Reserva> reservas = [];
   Reserva? reservaSeleccionada;
 
@@ -20,7 +21,7 @@ class ReservasServices extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    final url = Uri.https(_baseURL, 'reservas.json');
+    final url = Uri.https(_baseURL, 'reservas.json', {'auth': _firebaseToken});
     final resp = await http.get(url);
 
     final Map<String, dynamic> reservasMap = json.decode(resp.body);
@@ -40,7 +41,8 @@ class ReservasServices extends ChangeNotifier {
 
   // Aqui se debería manejar en caso de que no se encuentre la reserva
   Future<Reserva> getReservaById(int id) async {
-    final url = Uri.https(_baseURL, 'reservas/$id.json');
+    final url =
+        Uri.https(_baseURL, 'reservas/$id.json', {'auth': _firebaseToken});
     final resp = await http.get(url);
 
     final Map<String, dynamic> reservaMap = json.decode(resp.body);
@@ -52,7 +54,7 @@ class ReservasServices extends ChangeNotifier {
 
   // TODO Probar si funciona
   Future<List<Reserva>> getReservasByDate(DateTime date) async {
-    final url = Uri.https(_baseURL, 'reservas.json');
+    final url = Uri.https(_baseURL, 'reservas.json', {'auth': _firebaseToken});
     final resp = await http.get(url);
 
     final Map<String, dynamic> reservasMap = json.decode(resp.body);

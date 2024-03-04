@@ -31,7 +31,7 @@ class MiMenuDesplegable extends StatelessWidget {
           ),
           if (rol == "gerente" || rol == "peluquero")
             ListTile(
-              title: const Text('Horario'),
+              title: const Text('Horario de Trabajo'),
               leading: Icon(Icons.calendar_today),
               onTap: () {
                 Navigator.pushNamed(context, 'schedule');
@@ -47,7 +47,7 @@ class MiMenuDesplegable extends StatelessWidget {
             ),
           if (rol == "gerente")
             ListTile(
-              title: const Text('Calendarios'),
+              title: const Text('Horario Peluquería'),
               leading: Icon(Icons.calendar_today),
               onTap: () {
                 Navigator.pushNamed(context, 'horario');

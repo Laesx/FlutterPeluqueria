@@ -44,7 +44,7 @@ class UsuariosServices extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    final url = Uri.https(_baseURL, 'usuarios.json');
+    final url = Uri.https(_baseURL, 'usuarios.json', {'auth': _firebaseToken});
     final resp = await http.get(url);
 
     final Map<String, dynamic> usuariosMap = json.decode(resp.body);
@@ -74,7 +74,8 @@ class UsuariosServices extends ChangeNotifier {
   }
 
   Future<String> updateUsuario(Usuario usuario) async {
-    final url = Uri.https(_baseURL, 'usuarios/${usuario.id}.json');
+    final url = Uri.https(
+        _baseURL, 'usuarios/${usuario.id}.json', {'auth': _firebaseToken});
     final resp = await http.put(url, body: usuario.toJson());
     final decodedData = resp.body;
 
@@ -82,7 +83,8 @@ class UsuariosServices extends ChangeNotifier {
   }
 
   Future<String> updateUsuarioRol(String id, String nuevoRol) async {
-    final url = Uri.https(_baseURL, 'usuarios/$id.json');
+    final url =
+        Uri.https(_baseURL, 'usuarios/$id.json', {'auth': _firebaseToken});
 
     final resp = await http.patch(url, body: jsonEncode({'rol': nuevoRol}));
     final decodedData = resp.body;
@@ -91,7 +93,7 @@ class UsuariosServices extends ChangeNotifier {
   }
 
   Future<String> saveUsuario(Usuario usuario) async {
-    final url = Uri.https(_baseURL, 'usuarios.json');
+    final url = Uri.https(_baseURL, 'usuarios.json', {'auth': _firebaseToken});
     final resp = await http.post(url, body: usuario.toJson());
     return resp.body;
   }

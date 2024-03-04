@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 class HorariosServices extends ChangeNotifier {
   final String _baseURL =
       'fl-peluqueria-27d72-default-rtdb.europe-west1.firebasedatabase.app';
+  final String _firebaseToken = 'B9KTDm0g3J9qAs1ZlQRt5veeHiIObJo5ZTVwzvzp';
   final List<HorarioPeluquero> horarios = [];
   final List<Horario> horarioPelu = [];
 
@@ -23,7 +24,8 @@ class HorariosServices extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    final url = Uri.https(_baseURL, 'horario_peluqueria.json');
+    final url = Uri.https(
+        _baseURL, 'horario_peluqueria.json', {'auth': _firebaseToken});
     final resp = await http.get(url);
 
     final Map<String, dynamic> horariosMap = json.decode(resp.body);
@@ -41,7 +43,8 @@ class HorariosServices extends ChangeNotifier {
   Future<void> saveHorarioPelu(Horario horario) async {
     notifyListeners();
 
-    final url = Uri.https(_baseURL, 'horario_peluqueria.json');
+    final url = Uri.https(
+        _baseURL, 'horario_peluqueria.json', {'auth': _firebaseToken});
 
     final response = await http.put(
       url,
@@ -62,7 +65,7 @@ class HorariosServices extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    final url = Uri.https(_baseURL, 'horarios.json');
+    final url = Uri.https(_baseURL, 'horarios.json', {'auth': _firebaseToken});
     //print(url);
     final resp = await http.get(url);
 
@@ -100,7 +103,8 @@ class HorariosServices extends ChangeNotifier {
 
   // TODO Falta probar
   Future<String> updateHorario(HorarioPeluquero horarioPeluquero) async {
-    final url = Uri.https(_baseURL, 'horarios/${horarioPeluquero.id}.json');
+    final url = Uri.https(_baseURL, 'horarios/${horarioPeluquero.id}.json',
+        {'auth': _firebaseToken});
     final resp = await http.put(url, body: horarioPeluquero.toJson());
     final decodedData = resp.body;
 
@@ -115,7 +119,7 @@ class HorariosServices extends ChangeNotifier {
 
   // TODO Falta probar
   Future<String> createHorario(HorarioPeluquero horarioPeluquero) async {
-    final url = Uri.https(_baseURL, 'horarios.json');
+    final url = Uri.https(_baseURL, 'horarios.json', {'auth': _firebaseToken});
     final resp = await http.post(url, body: horarioPeluquero.toJson());
     final decodedData = json.decode(resp.body);
 
