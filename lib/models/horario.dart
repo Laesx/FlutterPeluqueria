@@ -75,45 +75,6 @@ class Horario {
 
   String toJson() => json.encode(toMap());
 
-  static showInfo(Horario horario) {
-    print('Domingo: ');
-    print('Empieza man: ${horario.domingo.empiezaMan}');
-    print('Empieza tarde: ${horario.domingo.empiezaTarde}');
-    print('Acaba man: ${horario.domingo.acabaMan}');
-    print('Acaba tarde: ${horario.domingo.acabaTarde}');
-    print('Festivos: ${horario.festivos}');
-    print('Jueves: ');
-    print('Empieza man: ${horario.jueves.empiezaMan}');
-    print('Empieza tarde: ${horario.jueves.empiezaTarde}');
-    print('Acaba man: ${horario.jueves.acabaMan}');
-    print('Acaba tarde: ${horario.jueves.acabaTarde}');
-    print('Lunes: ');
-    print('Empieza man: ${horario.lunes.empiezaMan}');
-    print('Empieza tarde: ${horario.lunes.empiezaTarde}');
-    print('Acaba man: ${horario.lunes.acabaMan}');
-    print('Acaba tarde: ${horario.lunes.acabaTarde}');
-    print('Martes: ');
-    print('Empieza man: ${horario.martes.empiezaMan}');
-    print('Empieza tarde: ${horario.martes.empiezaTarde}');
-    print('Acaba man: ${horario.martes.acabaMan}');
-    print('Acaba tarde: ${horario.martes.acabaTarde}');
-    print('Miércoles: ');
-    print('Empieza man: ${horario.miercoles.empiezaMan}');
-    print('Empieza tarde: ${horario.miercoles.empiezaTarde}');
-    print('Acaba man: ${horario.miercoles.acabaMan}');
-    print('Acaba tarde: ${horario.miercoles.acabaTarde}');
-    print('Sábado: ');
-    print('Empieza man: ${horario.sabado.empiezaMan}');
-    print('Empieza tarde: ${horario.sabado.empiezaTarde}');
-    print('Acaba man: ${horario.sabado.acabaMan}');
-    print('Acaba tarde: ${horario.sabado.acabaTarde}');
-    print('Viernes: ');
-    print('Empieza man: ${horario.viernes.empiezaMan}');
-    print('Empieza tarde: ${horario.viernes.empiezaTarde}');
-    print('Acaba man: ${horario.viernes.acabaMan}');
-    print('Acaba tarde: ${horario.viernes.acabaTarde}');
-  }
-
   factory Horario.fromMap(Map<String, dynamic> json) => Horario(
         domingo: json["domingo"] != null
             ? Dia.fromMap(json["domingo"])

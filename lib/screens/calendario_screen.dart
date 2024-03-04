@@ -86,7 +86,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void printFestivos() {
-    print('Festivosssssss: $festivosTotales');
+    //print('Festivosssssss: $festivosTotales');
   }
 
   Widget build(BuildContext context) {
@@ -184,8 +184,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                         .openingCalendar
                                                         .remove(selectedDay);
                                                   });
-                                                  print(
-                                                      'Dia eliminado: $selectedDay');
                                                   festivosTotales =
                                                       festivosTotales
                                                           .where((date) =>

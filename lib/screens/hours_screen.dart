@@ -22,10 +22,6 @@ class OpeningHoursManager extends StatefulWidget {
   List<Dia> getDaysOfWeek() {
     return _OpeningHoursManagerState.getDaysOfWeek();
   }
-
-  void printDays() {
-    _OpeningHoursManagerState.printDays();
-  }
 }
 
 class _OpeningHoursManagerState extends State<OpeningHoursManager> {
@@ -179,19 +175,6 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
     return daysOfWeek;
   }
 
-  static printDays() {
-    List<Dia> daysOfWeek = getDaysOfWeek();
-    List<String> day = _daysOfWeek;
-
-    for (Dia dia in daysOfWeek) {
-      print("Dia: " + day[daysOfWeek.indexOf(dia)]);
-      print("Empieza mañana: " + dia.empiezaMan);
-      print("Acaba mañana: " + dia.acabaMan);
-      print("Empieza tarde: " + dia.empiezaTarde);
-      print("Acaba tarde: " + dia.acabaTarde);
-    }
-  }
-
   int compareTimeOfDay(TimeOfDay t1, TimeOfDay t2) {
     final t1InMinutes = t1.hour * 60 + t1.minute;
     final t2InMinutes = t2.hour * 60 + t2.minute;
@@ -213,7 +196,7 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        print('Mostrando menu?');
+        //print('Mostrando menu?');
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(

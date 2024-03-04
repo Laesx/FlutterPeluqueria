@@ -45,7 +45,7 @@ class AuthService extends ChangeNotifier {
 
     final Map<String, dynamic> decodedResp = json.decode(resp.body);
 
-    print(resp.toString());
+    //print(resp.toString());
 
     if (decodedResp.containsKey('idToken')) {
       final idToken = decodedResp['idToken'];

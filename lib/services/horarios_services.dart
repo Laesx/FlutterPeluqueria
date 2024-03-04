@@ -105,7 +105,7 @@ class HorariosServices extends ChangeNotifier {
     final decodedData = resp.body;
 
     //TODO Print para prueba, esto hay que quitarlo
-    print(decodedData);
+    //print(decodedData);
     final index =
         horarios.indexWhere((element) => element.id == horarioPeluquero.id);
     horarios[index] = horarioPeluquero;

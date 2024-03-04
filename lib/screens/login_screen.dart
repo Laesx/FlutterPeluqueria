@@ -65,10 +65,10 @@ class _LoginForm extends StatelessWidget {
         Navigator.pushReplacementNamed(context, 'home');
       } else {
         // Manejar el caso donde activeUser es null
-        print("Error: No se pudo obtener el usuario activo.");
+        //print("Error: No se pudo obtener el usuario activo.");
       }
     } else {
-      print(errorMessage);
+      //print(errorMessage);
       showDialog(
         context: context,
         builder: (context) {
@@ -84,10 +84,10 @@ class _LoginForm extends StatelessWidget {
   void biometricLogin(LoginFormProvider loginForm, context) async {
     LocalAuthentication auth = LocalAuthentication();
     bool deviceSupported = await auth.isDeviceSupported();
-    print("Device supported: $deviceSupported");
+    //print("Device supported: $deviceSupported");
     List<BiometricType> availableBiometrics =
         await auth.getAvailableBiometrics();
-    print(availableBiometrics);
+    //print(availableBiometrics);
     try {
       // Mostrar diálogo de acceso con huella
       bool authenticated = await auth.authenticate(
@@ -97,7 +97,7 @@ class _LoginForm extends StatelessWidget {
             stickyAuth: true, // No falla si la aplicación pasa a segundo plano
             biometricOnly: true, // Impide uso de PIN
           ));
-      print(authenticated);
+      //print(authenticated);
       if (authenticated) {
         // Si la huella es correcta, comprueba que existan credenciales almacenadas
         final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -107,7 +107,7 @@ class _LoginForm extends StatelessWidget {
           loginForm.password = prefs.getString('password')!;
           await tryLogin(loginForm, context);
         } else {
-          print("Imposible :(");
+          //print("Imposible :(");
           showDialog(
             context: context,
             builder: (context) {
@@ -120,7 +120,7 @@ class _LoginForm extends StatelessWidget {
         }
       }
     } on PlatformException catch (e) {
-      print(e);
+      //print(e);
     }
   }
 

@@ -50,7 +50,7 @@ class _RegisterForm extends StatelessWidget {
       registerForm.isLoading = false;
       Navigator.pushReplacementNamed(context, 'login');
     } else {
-      print(errorMessage);
+      //print(errorMessage);
       showDialog(
         context: context,
         builder: (context) {

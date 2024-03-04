@@ -12,7 +12,7 @@ class MiMenuDesplegable extends StatelessWidget {
     final userProvider =
         Provider.of<ConnectedUserProvider>(context, listen: false);
     String rol = userProvider.getActiveUserRol()!.toLowerCase();
-    print(userProvider.activeUser.toJson());
+    //print(userProvider.activeUser.toJson());
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -111,17 +111,13 @@ Future<void> enlaceWhatsapp() async {
   var _whatsappURL =
       Uri.parse("https://wa.me/+34678177405?text=${Uri.tryParse("reserva")}");
   if (!await launchUrl(_whatsappURL)) {
-    print("could not launch");
     throw Exception('Could not launch $_whatsappURL');
   }
-  print("OK");
 }
 
 Future<void> enlaceTelefono() async {
   var _whatsappURL = Uri.parse("tel:+34678177405");
   if (!await launchUrl(_whatsappURL)) {
-    print("could not launch");
     throw Exception('Could not launch $_whatsappURL');
   }
-  print("OK");
 }
