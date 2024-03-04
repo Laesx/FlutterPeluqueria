@@ -10,7 +10,6 @@ void main() {
 }
 
 //void main() {initializeDateFormatting().then((_) => runApp(MyApp()));}
-
 class MyApp extends StatelessWidget {
   const MyApp({Key? key});
   @override

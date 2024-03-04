@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_peluqueria/screens/screens.dart';
+import 'package:flutter_peluqueria/models/usuario.dart';
+import 'package:flutter_peluqueria/services/usuarios_services.dart';
+import 'package:flutter_peluqueria/widgets/usuario.dart';
+import 'package:provider/provider.dart';
+
+import 'screens.dart';
 
 class GestionPeluquerosScreen extends StatefulWidget {
   @override
@@ -8,9 +13,19 @@ class GestionPeluquerosScreen extends StatefulWidget {
 }
 
 class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
-  List<Peluquero> peluqueros = []; //  lista de peluqueros de la base de datos
+  late UsuariosServices usuariosService;
+  List<Usuario> usuarios = [];
+  List<Usuario> resultadosBusqueda = [];
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    usuariosService = Provider.of<UsuariosServices>(context);
+    usuarios = usuariosService.usuarios;
+    resultadosBusqueda.addAll(usuarios);
+  }
+
+  @override 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: MiAppBar(),
@@ -25,23 +40,28 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
               ),
               onChanged: (query) {
                 setState(() {
-                  peluqueros = filtrarPeluqueros(query);
+                  resultadosBusqueda = usuarios
+                      .where((usuario) =>
+                          usuario.nombre
+                              .toLowerCase()
+                              .contains(query.toLowerCase()) ||
+                          (usuario.apellido != null &&
+                              usuario.apellido!
+                                  .toLowerCase()
+                                  .contains(query.toLowerCase())) ||
+                          usuario.telefono
+                              .toLowerCase()
+                              .contains(query.toLowerCase()))
+                      .toList();
                 });
               },
             ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: peluqueros.length,
+              itemCount: resultadosBusqueda.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(
-                      '${peluqueros[index].nombre} ${peluqueros[index].apellidos}'),
-                  subtitle: Text('${peluqueros[index].telefono}'),
-                  onTap: () {
-                    _mostrarDetallesPeluquero(peluqueros[index]);
-                  },
-                );
+                return UsuarioWidget(usuario: resultadosBusqueda[index]);
               },
             ),
           ),
@@ -49,52 +69,4 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
       ),
     );
   }
-
-  List<Peluquero> filtrarPeluqueros(String query) {
-    query = query.toLowerCase();
-    return peluqueros.where((peluquero) {
-      final nombreCompleto =
-          '${peluquero.nombre} ${peluquero.apellidos}'.toLowerCase();
-      final telefono = peluquero.telefono.toLowerCase();
-      return nombreCompleto.contains(query) || telefono.contains(query);
-    }).toList();
-  }
-
-  void _mostrarDetallesPeluquero(Peluquero peluquero) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Detalles del Peluquero'),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Nombre: ${peluquero.nombre} ${peluquero.apellidos}'),
-              Text('Teléfono: ${peluquero.telefono}'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Cierra el diálogo
-              },
-              child: Text('Cerrar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class Peluquero {
-  final String nombre;
-  final String apellidos;
-  final String telefono;
-
-  Peluquero({
-    required this.nombre,
-    required this.apellidos,
-    required this.telefono,
-  });
 }
