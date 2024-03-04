@@ -78,7 +78,6 @@ class HorariosServices extends ChangeNotifier {
     notifyListeners();
 
     return horarios;
-    //print(this.producto[1].nombre);
   }
 
   // TODO probar

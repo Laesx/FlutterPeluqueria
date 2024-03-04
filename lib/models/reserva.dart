@@ -6,7 +6,7 @@ class Reserva {
   bool pagada;
   String pago;
   String peluquero;
-  Map<String, bool> servicios;
+  Map<String, double> servicios;
   String usuario;
   String? id;
 
@@ -32,7 +32,7 @@ class Reserva {
         pago: json["pago"],
         peluquero: json["peluquero"],
         servicios: Map.from(json["servicios"])
-            .map((k, v) => MapEntry<String, bool>(k, v)),
+            .map((k, v) => MapEntry<String, double>(k, v.toDouble())),
         usuario: json["usuario"],
       );
 
