@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/models/usuario.dart';
 import 'package:flutter_peluqueria/services/usuarios_services.dart';
 import 'package:flutter_peluqueria/widgets/usuarios.dart';
+import 'package:provider/provider.dart';
 
 class GestionPeluquerosScreen extends StatefulWidget {
   @override
@@ -32,6 +33,10 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final usuariosService = Provider.of<UsuariosServices>(context);
+
+    usuariosService.usuarios; // Accede a la lista de usuarios
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Lista de Peluqueros'),
