@@ -15,39 +15,18 @@ class GestionPeluquerosScreen extends StatefulWidget {
 class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
   late UsuariosServices usuariosService;
   List<Usuario> usuarios = [];
+  List<Usuario> resultadosBusqueda = [];
 
-  @override
-  void initState() {
-    super.initState();
-    //_loadUsuarios(); // Llamamos al método en initState
-  }
-
-  // Cada vez que se actualiza el widget, se llama a didChangeDependencies
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     usuariosService = Provider.of<UsuariosServices>(context);
+    usuarios = usuariosService.usuarios;
+    resultadosBusqueda.addAll(usuarios);
   }
 
-  // Esto hay que borrarlo
-  Future<void> _loadUsuarios() async {
-    try {
-      //List<Usuario> loadedUsuarios = await UsuariosServices().loadUsuarios();
-      setState(() {
-        //usuarios = loadedUsuarios;
-      });
-    } catch (error) {
-      // Manejar cualquier error que pueda ocurrir durante la carga de usuarios
-      print('Error al cargar usuarios: $error');
-    }
-  }
-
-  @override
+  @override 
   Widget build(BuildContext context) {
-    usuarios.addAll(usuariosService.usuarios); // Accede a la lista de usuarios
-    print(usuariosService.usuarios);
-    print("lista, $usuarios");
-
     return Scaffold(
       appBar: MiAppBar(),
       drawer: MiMenuDesplegable(),
@@ -60,17 +39,32 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
                 labelText: 'Buscar por nombre, apellidos o teléfono',
               ),
               onChanged: (query) {
-                // Implementa la lógica de filtrado según tus necesidades
+                setState(() {
+                  resultadosBusqueda = usuarios
+                      .where((usuario) =>
+                          usuario.nombre
+                              .toLowerCase()
+                              .contains(query.toLowerCase()) ||
+                          (usuario.apellido != null &&
+                              usuario.apellido!
+                                  .toLowerCase()
+                                  .contains(query.toLowerCase())) ||
+                          usuario.telefono
+                              .toLowerCase()
+                              .contains(query.toLowerCase()))
+                      .toList();
+                });
               },
             ),
           ),
           Expanded(
-              child: ListView.builder(
-            itemCount: usuarios.length,
-            itemBuilder: (context, index) {
-              return UsuarioWidget(usuario: usuarios[index]);
-            },
-          )),
+            child: ListView.builder(
+              itemCount: resultadosBusqueda.length,
+              itemBuilder: (context, index) {
+                return UsuarioWidget(usuario: resultadosBusqueda[index]);
+              },
+            ),
+          ),
         ],
       ),
     );
