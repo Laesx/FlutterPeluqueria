@@ -5,383 +5,230 @@ import 'package:flutter_peluqueria/models/models.dart';
 import '../services/horarios_services.dart';
 
 class CalendarScreen extends StatefulWidget {
+  static final Map<DateTime, List<String>> openingCalendar = {};
+  static bool _isDataLoaded = false;
+  //Para manejar el estado de la pantalla de horas en la pantalla hours_screen.dart
+  static bool get isDataLoaded => _isDataLoaded;
+  static set isDataLoaded(bool value) {
+    _isDataLoaded = value;
+  }
+
+  static List<DateTime> getClosedDays() {
+    List<DateTime> closedDays = [];
+    openingCalendar.forEach((day, status) {
+      if (status.contains('Closed')) {
+        closedDays.add(day);
+      }
+    });
+
+    closedDays = closedDays.toSet().toList();
+    return closedDays;
+  }
+
+  void setClosedDays(List<DateTime> closedDays) {
+    openingCalendar.clear(); // Clear the existing map
+
+    // Iterate over all closed days
+    for (DateTime closedDay in closedDays) {
+      // Set the status of the closed day to 'Closed'
+      openingCalendar[closedDay] = ['Closed'];
+    }
+  }
+
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  static Horario? horario;
-  // Create instances of OpeningCalendar and OpeningHours
-  late OpeningCalendar openingCalendar;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Initialize the OpeningCalendar and OpeningHours instances
-    openingCalendar = OpeningCalendar();
-  }
-
-  static getHorario() {
-    return horario;
-  }
-
-  static setHorario(Horario horario) {
-    _CalendarScreenState.horario = horario;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Calendario y Horario de Apertura'),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          openingCalendar,
-          // Use the OpeningCalendar instance
-          // Use the OpeningHours instance
-
-          // Botón para guardar cambios
-          ElevatedButton(
-            onPressed: () {
-              // Get the closed days and opening hours from the instances
-              List<DateTime> closedDays = openingCalendar.getClosedDays();
-              // print the closed days and opening hours
-              // Save the closed days and opening hours to a file
-              List<Dia> dias = OpeningHoursManager().getDaysOfWeek();
-
-              //Probar a hacer tomap de los dias
-              Function mapaLunes = () => {"lunes": dias[0].toMap()};
-              print(mapaLunes());
-
-              //OpeningHoursManager().printDays();
-
-              Horario horario = Horario(
-                festivos: closedDays,
-                lunes: dias[0],
-                martes: dias[1],
-                miercoles: dias[2],
-                jueves: dias[3],
-                viernes: dias[4],
-                sabado: dias[5],
-                domingo: dias[6],
-              );
-              setHorario(horario);
-// Notify that horario was created successfully
-              HorariosServices().saveHorarioPelu(horario);
-            },
-            child: Text('Guardar man'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class OpeningCalendar extends StatefulWidget {
-  final Map<DateTime, List<String>> openingCalendar = {};
-  final Function(Map<DateTime, List<String>> calendar) onSaveChanges =
-      (calendar) {};
-
-  OpeningCalendar({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  _OpeningCalendarState createState() => _OpeningCalendarState();
-
-  List<DateTime> getClosedDays() {
-    List<DateTime> closedDays = [];
-    openingCalendar.forEach((day, status) {
-      if (status.contains('Closed')) {
-        closedDays.add(day);
-      } else {
-        if (day.weekday == DateTime.saturday ||
-            day.weekday == DateTime.sunday) {
-          closedDays.add(day);
-        }
-      }
-    });
-    return closedDays;
-  }
-}
-
-class _OpeningCalendarState extends State<OpeningCalendar> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
+  late List<Horario> oldHorario;
+  static Horario horario = Horario.empty();
+  Future? _loadHorariosFuture;
+  bool holidaysLoaded = false;
+  List<DateTime> festivosTotales = [];
+  bool horariosPulsados = false;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Calendario de Apertura',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          SizedBox(height: 10),
-          TableCalendar(
-            firstDay:
-                DateTime.utc(DateTime.now().year, DateTime.now().month, 1),
-            lastDay:
-                DateTime.utc(DateTime.now().year, DateTime.now().month + 2, 31),
-            focusedDay: DateTime.now(),
-            calendarFormat: _calendarFormat,
-            onFormatChanged: (format) {
-              setState(() {
-                _calendarFormat = format;
-              });
-            },
-            weekendDays: [DateTime.saturday, DateTime.sunday],
-            daysOfWeekStyle: DaysOfWeekStyle(
-              weekendStyle: TextStyle(color: Colors.red),
-            ),
-            calendarStyle: CalendarStyle(
-              weekendTextStyle: TextStyle(color: Colors.red),
-            ),
-            //Para no poder seleccionar el finde
-            selectedDayPredicate: (day) {
-              if (day.weekday == DateTime.saturday ||
-                  day.weekday == DateTime.sunday) {
-                return false;
-              }
-              return widget.openingCalendar.containsKey(day);
-            },
-            calendarBuilders: CalendarBuilders(
-              defaultBuilder: (context, day, _) {
-                if (widget.openingCalendar.containsKey(day) &&
-                    widget.openingCalendar[day]!.contains('Closed')) {
-                  return Container(
-                    margin: const EdgeInsets.all(4.0),
-                    padding: const EdgeInsets.only(top: 5.0),
-                    alignment: Alignment.center,
-                    child: Text(
-                      day.day.toString(),
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  );
-                }
-              },
-            ),
-            onDaySelected: (selectedDay, focusedDay) {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('Select Option'),
-                  content: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              widget.openingCalendar.remove(selectedDay);
-                            });
-                            widget.onSaveChanges(widget.openingCalendar);
-                            Navigator.pop(context);
-                          },
-                          child: Text('Open'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              widget.openingCalendar[selectedDay] = ['Closed'];
-                            });
-                            widget.onSaveChanges(widget.openingCalendar);
-                            Navigator.pop(context);
-                          },
-                          child: Text('Close'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => OpeningHoursManager()),
-              );
-            },
-            child: Text('Open Calendar Manager'),
-          ),
-        ],
-      ),
-    );
+  bool fechaIgual(DateTime fecha, List<DateTime> festivos) {
+    String fechaS = fecha.toString();
+    String fechaFinal = fechaS.split('Z')[0];
+
+    for (DateTime festivo in festivos) {
+      String festivoS = festivo.toString();
+      if (fechaFinal == festivoS) {
+        return true;
+      }
+    }
+    return false;
   }
-}
-/*
-extension on TimeOfDay {
-  String format24Hour(BuildContext context) {
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
-    final String formattedTimeOfDay =
-        localizations.formatTimeOfDay(this, alwaysUse24HourFormat: true);
-    return formattedTimeOfDay;
-  }
-}
 
-class OpeningHoursManager extends StatefulWidget {
-  @override
-  _OpeningHoursManagerState createState() => _OpeningHoursManagerState();
-}
-
-class _OpeningHoursManagerState extends State<OpeningHoursManager> {
-  final List<String> _daysOfWeek = [
-    'Lunes',
-    'Martes',
-    'Miércoles',
-    'Jueves',
-    'Viernes',
-    'Sábado',
-    'Domingo',
-  ];
-
-  Map<String, TimeOfDay> _morningOpeningTimes = {};
-  Map<String, TimeOfDay> _morningClosingTimes = {};
-  Map<String, TimeOfDay> _afternoonOpeningTimes = {};
-  Map<String, TimeOfDay> _afternoonClosingTimes = {};
-  Map<String, bool> _morningClosed = {};
-  Map<String, bool> _afternoonClosed = {};
-
-  @override
   void initState() {
     super.initState();
-    _daysOfWeek.forEach((day) {
-      _morningOpeningTimes[day] = TimeOfDay(hour: 9, minute: 0);
-      _morningClosingTimes[day] = TimeOfDay(hour: 12, minute: 0);
-      _afternoonOpeningTimes[day] = TimeOfDay(hour: 13, minute: 0);
-      _afternoonClosingTimes[day] = TimeOfDay(hour: 17, minute: 0);
-      _morningClosed[day] = false;
-      _afternoonClosed[day] = false;
-    });
-  }
-
-  void printSchedule() {
-    for (String day in _daysOfWeek) {
-      print('$day:');
-      print(
-          '  Mañana: ${_morningClosed[day]! ? "cerrado" : "${_morningOpeningTimes[day]!.format24Hour(context)} - ${_morningClosingTimes[day]!.format24Hour(context)}"}');
-      print(
-          '  Tarde: ${_afternoonClosed[day]! ? "cerrado" : "${_afternoonOpeningTimes[day]!.format24Hour(context)} - ${_afternoonClosingTimes[day]!.format24Hour(context)}"}');
+    if (!holidaysLoaded) {
+      loadHorarios();
+      holidaysLoaded = true;
     }
   }
 
-  Future<void> _selectTime(BuildContext context, String day, bool isMorning,
-      bool isOpeningTime) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: isOpeningTime
-          ? (isMorning
-              ? _morningOpeningTimes[day]!
-              : _afternoonOpeningTimes[day]!)
-          : (isMorning
-              ? _morningClosingTimes[day]!
-              : _afternoonClosingTimes[day]!),
-    );
-    if (picked != null)
-      setState(() {
-        if (isOpeningTime) {
-          if (isMorning) {
-            _morningOpeningTimes[day] = picked;
-          } else {
-            _afternoonOpeningTimes[day] = picked;
-          }
-        } else {
-          if (isMorning) {
-            _morningClosingTimes[day] = picked;
-          } else {
-            _afternoonClosingTimes[day] = picked;
-          }
-        }
-      });
-    Navigator.pop(context);
+  Future<void> loadHorarios() async {
+    final horariosServices = HorariosServices();
+    _loadHorariosFuture = horariosServices.loadHorarioPelu();
+    oldHorario = await _loadHorariosFuture as List<Horario>;
+    horario = oldHorario[0];
+
+    festivosTotales = horario.festivos;
+    CalendarScreen().setClosedDays(festivosTotales);
+    //print('Festivos: ${horario.festivos}');
   }
 
-  @override
+  List<DateTime> getFestivos() {
+    return festivosTotales;
+  }
+
+  void printFestivos() {
+    print('Festivosssssss: $festivosTotales');
+  }
+
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            itemCount: _daysOfWeek.length,
-            itemBuilder: (context, index) {
-              String day = _daysOfWeek[index];
-              return Card(
-                child: ListTile(
-                  title: Text(day),
-                  subtitle: Text(
-                    'Mañana: ${_morningClosed[day]! ? "cerrado" : "${_morningOpeningTimes[day]!.format24Hour(context)} - ${_morningClosingTimes[day]!.format24Hour(context)}"}\n'
-                    'Tarde: ${_afternoonClosed[day]! ? "cerrado" : "${_afternoonOpeningTimes[day]!.format24Hour(context)} - ${_afternoonClosingTimes[day]!.format24Hour(context)}"}',
-                  ),
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                              title: Text('Select Option'),
-                              content: SingleChildScrollView(
-                                // Add this
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min, // Set this
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: () =>
-                                          _selectTime(context, day, true, true),
-                                      child: Text('Hora apertura mañana'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => _selectTime(
-                                          context, day, true, false),
-                                      child: Text('Hora cierre mañana'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => _selectTime(
-                                          context, day, false, true),
-                                      child: Text('Hora apertura tarde'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => _selectTime(
-                                          context, day, false, false),
-                                      child: Text('Hora cierre tarde'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          _morningClosed[day] = true;
-                                          _afternoonClosed[day] = true;
-                                        });
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text('Cerrado (todo el dia)'),
-                                    ),
-                                  ],
-                                ),
+    return FutureBuilder(
+        future: _loadHorariosFuture,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator(); // Show a loading spinner while waiting for the data
+          } else if (snapshot.hasError) {
+            return Text(
+                'Error: ${snapshot.error}'); // Show an error message if something went wrong
+          } else {
+            return Scaffold(
+                body: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TableCalendar(
+                      firstDay: DateTime.utc(
+                          DateTime.now().year, DateTime.now().month, 1),
+                      lastDay: DateTime.utc(
+                          DateTime.now().year, DateTime.now().month + 2, 31),
+                      focusedDay: DateTime.now(),
+                      calendarBuilders: CalendarBuilders(
+                        defaultBuilder: (context, date, events) {
+                          DateTime dayOnly =
+                              DateTime(date.year, date.month, date.day);
+
+                          if (festivosTotales.contains(dayOnly)) {
+                            return Text(
+                              date.day.toString(),
+                              style: TextStyle(color: Colors.red),
+                            );
+                          }
+
+                          List<String>? states =
+                              CalendarScreen.openingCalendar[date];
+                          String state = states != null && states.isNotEmpty
+                              ? states.first
+                              : '';
+                          if (state == 'Closed') {
+                            return Text(
+                              date.day.toString(),
+                              style: TextStyle(color: Colors.red),
+                            );
+                          } else {
+                            return Text(date.day.toString());
+                          }
+                        },
+                      ),
+                      //Para los formatos
+                      calendarFormat: _calendarFormat,
+                      onFormatChanged: (format) {
+                        setState(() {
+                          _calendarFormat = format;
+                        });
+                      },
+                      onDaySelected: (selectedDay, focusedDay) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('Select Option'),
+                            content: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        CalendarScreen.openingCalendar
+                                            .remove(selectedDay);
+                                      });
+                                      print('Dia eliminado: $selectedDay');
+                                      festivosTotales = festivosTotales
+                                          .where((date) =>
+                                              !isSameDay(date, selectedDay))
+                                          .toList();
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text('Open'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        CalendarScreen
+                                            .openingCalendar[selectedDay] = [
+                                          'Closed'
+                                        ];
+                                      });
+                                      if (!fechaIgual(
+                                          selectedDay, festivosTotales)) {
+                                        festivosTotales.add(selectedDay);
+                                        festivosTotales =
+                                            festivosTotales.toSet().toList();
+                                      }
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text('Close'),
+                                  ),
+                                ],
                               ),
-                            ));
-                  },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        printFestivos();
+                      },
+                      child: Text('Mostrar festivos'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          horariosPulsados = true;
+                        });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => OpeningHoursManager()),
+                        );
+                      },
+                      child: Text('Open Calendar Manager'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (horariosPulsados) {
+                          List<Dia> daysOfWeek =
+                              OpeningHoursManager().getDaysOfWeek();
+                          horario.setDiasSemana(daysOfWeek);
+                        }
+                        horario.setDiasFestivos(festivosTotales);
+                        HorariosServices().saveHorarioPelu(horario);
+                      },
+                      child: Text('Save changes'),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            // Add your button functionality here
-            printSchedule();
-          },
-          child: Text('Guardar cambios'),
-        ),
-      ],
-    );
+              ),
+            ));
+          }
+        });
   }
 }
-*/
