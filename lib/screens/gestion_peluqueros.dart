@@ -11,14 +11,23 @@ class GestionPeluquerosScreen extends StatefulWidget {
 }
 
 class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
+  late UsuariosServices usuariosService;
   List<Usuario> usuarios = [];
 
   @override
   void initState() {
     super.initState();
-    _loadUsuarios(); // Llamamos al método en initState
+    //_loadUsuarios(); // Llamamos al método en initState
   }
 
+  // Cada vez que se actualiza el widget, se llama a didChangeDependencies
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    usuariosService = Provider.of<UsuariosServices>(context);
+  }
+
+  // Esto me parece que no vamos a tener que usarlo, pongo esto para avisar
   Future<void> _loadUsuarios() async {
     try {
       List<Usuario> loadedUsuarios = await UsuariosServices().loadUsuarios();
@@ -33,8 +42,6 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final usuariosService = Provider.of<UsuariosServices>(context);
-
     usuarios.addAll(usuariosService.usuarios); // Accede a la lista de usuarios
     print("lista, $usuarios");
 
@@ -49,22 +56,19 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
             child: TextField(
               decoration: InputDecoration(
                 labelText: 'Buscar por nombre, apellidos o teléfono',
-                
               ),
               onChanged: (query) {
-                // Implementa la lógica de filtrado según tus necesidades
                 // Implementa la lógica de filtrado según tus necesidades
               },
             ),
           ),
           Expanded(
-            child:  ListView.builder(
-                    itemCount: usuarios.length,
-                    itemBuilder: (context, index) {
-                      return UsuarioWidget(usuario: usuarios[index]);
-                    },
-                  )
-          ),
+              child: ListView.builder(
+            itemCount: usuarios.length,
+            itemBuilder: (context, index) {
+              return UsuarioWidget(usuario: usuarios[index]);
+            },
+          )),
         ],
       ),
     );

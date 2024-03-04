@@ -24,12 +24,15 @@ class UsuariosServices extends ChangeNotifier {
     final url = Uri.https(_baseURL, 'usuarios.json', {'auth': _firebaseToken});
     final resp = await http.get(url);
 
+    //print(resp.body);
+
     final Map<String, dynamic> usuariosMap = json.decode(resp.body);
 
     this.usuarios.clear();
 
     usuariosMap.forEach((key, value) {
-      final tempUser = Usuario.fromMap(value);
+      print("Key: $key, Value: $value");
+      final Usuario tempUser = Usuario.fromMap(value);
       tempUser.id = key;
       usuarios.add(tempUser);
     });
