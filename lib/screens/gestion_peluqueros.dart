@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_peluqueria/screens/screens.dart';
 
 class GestionPeluquerosScreen extends StatefulWidget {
   @override
@@ -12,9 +13,8 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Lista de Peluqueros'),
-      ),
+      appBar: MiAppBar(),
+      drawer: MiMenuDesplegable(),
       body: Column(
         children: [
           Padding(

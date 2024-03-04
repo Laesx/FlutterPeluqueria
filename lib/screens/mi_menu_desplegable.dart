@@ -1,58 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/app_routes/app_routes.dart';
+import 'package:flutter_peluqueria/providers/providers.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MiMenuDesplegable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final userProvider =
+        Provider.of<ConnectedUserProvider>(context, listen: false);
+    String rol = userProvider.getActiveUserRol()!.toLowerCase();
+    print(userProvider.activeUser.toJson());
     return Drawer(
-      child: ListView.separated(
-        itemBuilder: (context, index) {
-          if (index < AppRoutes.menuOptions.length) {
-            return ListTile(
-              leading: Icon(AppRoutes.menuOptions[index].icon),
-              title: Text(AppRoutes.menuOptions[index].name),
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          UserAccountsDrawerHeader(
+            accountName:
+                Text("Conectado como: ${userProvider.activeUser.nombre}"),
+            accountEmail: Text("Rol: $rol"),
+          ),
+          ListTile(
+            title: const Text('Inicio'),
+            leading: Icon(Icons.home),
+            onTap: () {
+              Navigator.pushReplacementNamed(context, 'home');
+            },
+          ),
+          if (rol == "gerente")
+            ListTile(
+              title: const Text('Horario'),
+              leading: Icon(Icons.calendar_today),
               onTap: () {
-                Navigator.pushNamed(
-                    context, AppRoutes.menuOptions[index].route);
+                Navigator.pushReplacementNamed(context, 'schedule');
               },
-            );
-          } else if (index == AppRoutes.menuOptions.length) {
-            return ListTile(
-              leading: Icon(Icons.phone),
-              title: Text('Llamar'),
-              onTap: enlaceTelefono,
-            );
-          } else {
-            return ListTile(
-              leading: Icon(Icons.message),
-              title: Text('WhatsApp'),
-              onTap: enlaceWhatsapp,
-            );
-          }
-        },
-        separatorBuilder: (context, index) => Divider(),
-        itemCount: AppRoutes.menuOptions.length + 2,
+            ),
+          if (rol == "gerente")
+            ListTile(
+              title: const Text('Gestión de Peluqueros'),
+              leading: Icon(Icons.people),
+              onTap: () {
+                Navigator.pushReplacementNamed(context, 'gestion');
+              },
+            ),
+          if (rol == "gerente")
+            ListTile(
+              title: const Text('Calendarios'),
+              leading: Icon(Icons.calendar_today),
+              onTap: () {
+                Navigator.pushReplacementNamed(context, 'horario');
+              },
+            ),
+          ListTile(
+            title: const Text('Reservas'),
+            leading: Icon(Icons.calendar_today),
+            onTap: () {
+              Navigator.pushReplacementNamed(context, 'reservas');
+            },
+          ),
+          ListTile(
+            title: const Text('Registro'),
+            leading: Icon(Icons.app_registration_outlined),
+            onTap: () {
+              Navigator.pushReplacementNamed(context, 'registro');
+            },
+          ),
+          Divider(
+            thickness: 0.5,
+            color: Colors.grey[400],
+          ),
+          ListTile(
+            title: Column(
+              children: [
+                Text("Contacta!"),
+                SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () => enlaceWhatsapp(),
+                      icon: Icon(
+                        Icons.chat,
+                        size: 40,
+                      ),
+                    ),
+                    SizedBox(width: 60),
+                    IconButton(
+                      onPressed: () => enlaceTelefono(),
+                      icon: Icon(
+                        Icons.phone,
+                        size: 40,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Future<void> enlaceWhatsapp() async {
-    var _whatsappURL =
-        Uri.parse("https://wa.me/+34678177405?text=${Uri.tryParse("reserva")}");
-    if (!await launchUrl(_whatsappURL)) {
-      print("could not launch");
-      throw Exception('Could not launch $_whatsappURL');
-    }
-    print("OK");
+Future<void> enlaceWhatsapp() async {
+  var _whatsappURL =
+      Uri.parse("https://wa.me/+34678177405?text=${Uri.tryParse("reserva")}");
+  if (!await launchUrl(_whatsappURL)) {
+    print("could not launch");
+    throw Exception('Could not launch $_whatsappURL');
   }
+  print("OK");
+}
 
-  Future<void> enlaceTelefono() async {
-    var _whatsappURL = Uri.parse("tel:+34678177405");
-    if (!await launchUrl(_whatsappURL)) {
-      print("could not launch");
-      throw Exception('Could not launch $_whatsappURL');
-    }
-    print("OK");
+Future<void> enlaceTelefono() async {
+  var _whatsappURL = Uri.parse("tel:+34678177405");
+  if (!await launchUrl(_whatsappURL)) {
+    print("could not launch");
+    throw Exception('Could not launch $_whatsappURL');
   }
+  print("OK");
 }

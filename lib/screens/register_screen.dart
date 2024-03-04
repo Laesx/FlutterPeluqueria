@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/models/usuario.dart';
 import 'package:flutter_peluqueria/providers/register_form_provider.dart';
+import 'package:flutter_peluqueria/screens/screens.dart';
 import 'package:flutter_peluqueria/services/usuarios_services.dart';
 import 'package:flutter_peluqueria/widgets/simple_button.dart';
 import 'package:flutter_peluqueria/widgets/password_text_field.dart';
@@ -14,6 +15,8 @@ class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: MiAppBar(),
+      drawer: MiMenuDesplegable(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Center(
