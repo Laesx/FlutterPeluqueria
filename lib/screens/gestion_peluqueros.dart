@@ -53,6 +53,7 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
               ),
               onChanged: (query) {
                 // Implementa la lógica de filtrado según tus necesidades
+                // Implementa la lógica de filtrado según tus necesidades
               },
             ),
           ),
