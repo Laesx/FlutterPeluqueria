@@ -102,7 +102,7 @@ class _RegisterForm extends StatelessWidget {
 
           const SizedBox(height: 40),
 
-          // username
+          // Email
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25.0),
             child: TextFormField(
@@ -125,6 +125,43 @@ class _RegisterForm extends StatelessWidget {
               },
             ),
           ),
+
+          const SizedBox(height: 10),
+
+          // Password
+          PasswordTextField(
+            onChanged: (value) => registerForm.password = value,
+            validator: (value) {
+              return (value != null && value.length >= 6)
+                  ? null
+                  : "La contraseña debe tener al menos 6 caracteres";
+            },
+          ),
+
+          const SizedBox(height: 10),
+
+          // Nombre
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25.0),
+            child: TextFormField(
+              keyboardType: TextInputType.name,
+              textCapitalization: TextCapitalization.words,
+              obscureText: false,
+              decoration: const InputDecoration(
+                hintText: "Nombre",
+                suffixIcon: Icon(Icons.person),
+              ),
+              onChanged: (value) => registerForm.nombre = value,
+              validator: (value) {
+                return (value ?? '').length >= 2
+                    ? null
+                    : "Introduce un nombre válido";
+              },
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
           // Apellido
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25.0),
@@ -147,34 +184,21 @@ class _RegisterForm extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // Password
-          PasswordTextField(
-            onChanged: (value) => registerForm.password = value,
-            validator: (value) {
-              return (value != null && value.length >= 6)
-                  ? null
-                  : "La contraseña debe tener al menos 6 caracteres";
-            },
-          ),
-
-          const SizedBox(height: 10),
-
-          // nombre completo
+          // Teléfono
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25.0),
             child: TextFormField(
-              keyboardType: TextInputType.name,
-              textCapitalization: TextCapitalization.words,
+              keyboardType: TextInputType.phone,
               obscureText: false,
               decoration: const InputDecoration(
-                hintText: "Nombre",
-                suffixIcon: Icon(Icons.person),
+                hintText: "Teléfono",
+                suffixIcon: Icon(Icons.phone),
               ),
-              onChanged: (value) => registerForm.nombre = value,
+              onChanged: (value) => registerForm.telefono = value,
               validator: (value) {
-                return (value ?? '').length >= 2
+                return (value != null && value.length >= 9)
                     ? null
-                    : "Introduce un nombre válido";
+                    : "Introduce un número de teléfono válido";
               },
             ),
           ),
