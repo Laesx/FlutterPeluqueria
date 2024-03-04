@@ -9,7 +9,10 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 class CalendarReservations extends StatefulWidget {
-  const CalendarReservations({super.key});
+  final String peluqueroBusqueda;
+
+  const CalendarReservations({Key? key, this.peluqueroBusqueda = ""})
+      : super(key: key);
 
   @override
   State<CalendarReservations> createState() => _CalendarReservationsState();
@@ -26,6 +29,7 @@ class _CalendarReservationsState extends State<CalendarReservations> {
 
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+
 
   @override
   void initState() {
@@ -69,6 +73,11 @@ class _CalendarReservationsState extends State<CalendarReservations> {
           reserva.fecha[0].year != day.year);
     }
 
+    if (widget.peluqueroBusqueda.isNotEmpty) {
+      // Aquí se filtran las reservas por el peluquero
+      reservas.retainWhere((reserva) => reserva.peluquero == widget.peluqueroBusqueda);
+    }
+
     // Ordena la lista de reservas por fecha
     reservas.sort((a, b) => a.fecha[0].compareTo(b.fecha[0]));
 
@@ -93,6 +102,8 @@ class _CalendarReservationsState extends State<CalendarReservations> {
 
   @override
   Widget build(BuildContext context) {
+    _selectedSchedule.value = _getReservasPorDia(_selectedDay!);
+
     // Esta función maneja cuando se selecciona una hora
     onTimePressed(timeSelected) {
       //print(timeSelected.toString());
@@ -109,6 +120,25 @@ class _CalendarReservationsState extends State<CalendarReservations> {
 
     return Column(
       children: [
+        /*
+        Padding(
+          padding: const EdgeInsets.all(15),
+          child: TextField(
+            decoration: const InputDecoration(
+              labelText: 'Filtrar reservas por peluquero',
+            ),
+            onChanged: (peluquero) {
+              setState(() {
+                _selectedPeluquero = peluquero;
+                _selectedSchedule.value = _selectedPeluquero != null
+                    ? _getReservasPorPeluquero(
+                        _selectedDay!, _selectedPeluquero!)
+                    : _getReservasPorDia(_selectedDay!);
+              });
+            },
+          ),
+        ),
+        */
         TableCalendar(
           locale: 'es_ES',
           firstDay: kFirstDay,
