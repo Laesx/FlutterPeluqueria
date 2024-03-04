@@ -6,6 +6,7 @@ class RegisterFormProvider extends ChangeNotifier {
   String password = '';
   String genero = '';
   String nombre = '';
+  String apellido = '';
   String rol = 'usuario';
   String telefono = '';
   bool verificado = false;
@@ -19,7 +20,7 @@ class RegisterFormProvider extends ChangeNotifier {
   }
 
   bool isValidForm() {
-    print('$email - $password - $nombre');
+    //print('$email - $password - $nombre');
     return formKey.currentState?.validate() ?? false;
   }
 }

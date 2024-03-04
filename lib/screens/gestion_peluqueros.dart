@@ -46,9 +46,8 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
     print("lista, $usuarios");
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Lista de Peluqueros'),
-      ),
+      appBar: MiAppBar(),
+      drawer: MiMenuDesplegable(),
       body: Column(
         children: [
           Padding(

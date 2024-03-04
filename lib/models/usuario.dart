@@ -5,17 +5,17 @@ class Usuario {
   String genero;
   String? id;
   String nombre;
+  String? apellido;
   String rol;
   String telefono;
-  String? horaInicial;
-  String? horaFin;
-  bool verificado = false;
+  bool verificado;
 
   Usuario({
     required this.email,
     required this.genero,
     this.id,
     required this.nombre,
+    this.apellido,
     required this.rol,
     required this.telefono,
     this.horaInicial,
@@ -35,10 +35,9 @@ class Usuario {
         email: json["email"],
         genero: json["genero"],
         nombre: json["nombre"],
+        apellido: json["apellido"] != null ? json["apellido"] : "",
         rol: json["rol"],
-        telefono: json["telefono"],
-        horaInicial: json["horaentrada"],
-        horaFin: json["horasalida"],
+        telefono: json["telefono"].toString(),
         verificado: json["verificado"],
       );
 
@@ -46,6 +45,7 @@ class Usuario {
         "email": email,
         "genero": genero,
         "nombre": nombre,
+        "apellido": apellido,
         "rol": rol,
         "telefono": telefono,
         "horaentrada": horaInicial,
@@ -53,5 +53,14 @@ class Usuario {
         "verificado": verificado,
       };
 
-  static fromMap(value) {}
+  Usuario copy() => Usuario(
+        id: this.id,
+        email: this.email,
+        genero: this.genero,
+        nombre: this.nombre,
+        apellido: this.apellido,
+        rol: this.rol,
+        telefono: this.telefono,
+        verificado: this.verificado,
+      );
 }

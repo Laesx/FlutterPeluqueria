@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/screens/gestion_peluqueros.dart';
+import 'package:flutter_peluqueria/services/auth_services.dart';
 
 import '../models/models.dart';
 import '../screens/screens.dart';
+import '../screens/register_screen.dart';
 
 class AppRoutes {
   static const initialRoute = 'login';
@@ -22,7 +24,25 @@ class AppRoutes {
         route: 'gestion',
         icon: Icons.people,
         name: 'Gestión',
-        screen:  GestionPeluquerosScreen()),
+        screen: GestionPeluquerosScreen()),
+    MenuOption(
+      route: 'horario',
+      icon: Icons.calendar_today,
+      name: 'Horario',
+      screen: CalendarScreen(),
+    ),
+    MenuOption(
+      route: 'reservas',
+      icon: Icons.calendar_today,
+      name: 'Reservas',
+      screen: const ReservasScreen(),
+    ),
+    MenuOption(
+      route: 'registro',
+      icon: Icons.app_registration_outlined,
+      name: 'Registro',
+      screen: const RegisterScreen(),
+    )
   ];
 
   static Map<String, Widget Function(BuildContext)> getAppRoutes() {
@@ -31,6 +51,9 @@ class AppRoutes {
       'schedule': (context) => const ScheduleScreen(),
       'gestion': (context) => GestionPeluquerosScreen(),
       'login': (context) => const LoginScreen(),
+      'reservas': (context) => const ReservasScreen(),
+      'horario': (context) => CalendarScreen(),
+      'registro': (context) => const RegisterScreen(),
     };
   }
 

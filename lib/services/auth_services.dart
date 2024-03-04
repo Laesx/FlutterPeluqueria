@@ -45,7 +45,7 @@ class AuthService extends ChangeNotifier {
 
     final Map<String, dynamic> decodedResp = json.decode(resp.body);
 
-    print(resp.toString());
+    //print(resp.toString());
 
     if (decodedResp.containsKey('idToken')) {
       final idToken = decodedResp['idToken'];
@@ -57,5 +57,13 @@ class AuthService extends ChangeNotifier {
     } else {
       return decodedResp['error']['message'];
     }
+  }
+
+  Future<String?> getUserRole() async {
+    final idToken = await storage.read(key: 'idToken');
+    final url = Uri.parse(_baseUrl + '/v1/accounts:lookup');
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $idToken',
+    });
   }
 }

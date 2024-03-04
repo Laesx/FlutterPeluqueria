@@ -55,11 +55,13 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     reservas.addAll(reservasServices.reservas);
 
     // Comprueba que sea el peluquero activo el que tiene la reserva
-    reservas.removeWhere((reserva) =>
-        reserva.peluquero != usuarioActivo.id ||
-        reserva.fecha[0].day != day.day ||
-        reserva.fecha[0].month != day.month ||
-        reserva.fecha[0].year != day.year);
+    if (usuarioActivo.rol != 'gerente') {
+      reservas.removeWhere((reserva) =>
+          reserva.peluquero != usuarioActivo.id ||
+          reserva.fecha[0].day != day.day ||
+          reserva.fecha[0].month != day.month ||
+          reserva.fecha[0].year != day.year);
+    }
 
     return reservas;
   }
@@ -77,7 +79,8 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     }
 
     for (var horarioPeluquero in horariosServices.horarios) {
-      if (horarioPeluquero.peluquero == usuarioActivo.id) {
+      if (horarioPeluquero.peluquero == usuarioActivo.id ||
+          usuarioActivo.rol == 'gerente') {
         for (var festivo in horarioPeluquero.horario.festivos) {
           if (festivo.day == day.day &&
               festivo.month == day.month &&
@@ -126,10 +129,24 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     // Esta sección es para comprobar las horas que tiene el peluquero
     // para luego contrastarlas con las horas de la peluqueria en si.
     List<String> horasPeluquero = [];
-    Map<String, dynamic> horarioPeluqueroMapa = horariosServices.horarios
-        .firstWhere((horario) => horario.peluquero == usuarioActivo.id)
-        .horario
-        .toMap();
+
+    // TODO CONTROLAR AQUI QUE NO PETE SI NO HAY NADA
+    Map<String, dynamic> horarioPeluqueroMapa = {};
+
+    if (usuarioActivo.rol == 'gerente') {
+      Map<String, dynamic> horarioPeluqueroMapaTemporal = {};
+      horariosServices.horarios.forEach((horario) {
+        horarioPeluqueroMapaTemporal.addAll(horario.horario.toMap());
+      });
+      horarioPeluqueroMapa = horarioPeluqueroMapaTemporal;
+    } else {
+      horarioPeluqueroMapa = horariosServices.horarios
+          .firstWhere((horario) =>
+              horario.peluquero == usuarioActivo.id ||
+              usuarioActivo.rol == 'gerente')
+          .horario
+          .toMap();
+    }
 
     horarioPeluqueroMapa.forEach((key, value) {
       if (key == diaSemana(day)) {
@@ -185,7 +202,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     var endMinute = int.parse(endTime.split(':')[1]);
 
     for (var hour = startHour; hour <= endHour; hour++) {
-      for (var minute = 0; minute < 60; minute += 30) {
+      for (var minute = 0; minute < 60; minute += 15) {
         if (hour == startHour && minute < startMinute ||
             hour == endHour && minute > endMinute) {
           continue;
@@ -302,7 +319,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
                 children: [
                   Wrap(
                     spacing: 20.0,
-                    runSpacing: 60.0,
+                    runSpacing: 20.0,
                     children: [
                       for (int i = 0; i < dia.length; i++) ...[
                         BotonHora(

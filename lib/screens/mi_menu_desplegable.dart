@@ -1,45 +1,123 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/app_routes/app_routes.dart';
+import 'package:flutter_peluqueria/providers/providers.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../providers/providers.dart';
 
 class MiMenuDesplegable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final userProvider =
+        Provider.of<ConnectedUserProvider>(context, listen: false);
+    String rol = userProvider.getActiveUserRol()!.toLowerCase();
+    //print(userProvider.activeUser.toJson());
     return Drawer(
-      child: ListView.separated(
-          itemBuilder: (context, index) {
-            return ListTile(
-              leading: Icon(AppRoutes.menuOptions[index].icon),
-              title: Text(AppRoutes.menuOptions[index].name),
-              onTap: () {
-                // Otra forma de hacerlo para usar push en vez de pushNamed
-                // final route = MaterialPageRoute(builder: (context) {return const HomeScreen();});
-                Navigator.pushNamed(
-                    context, AppRoutes.menuOptions[index].route);
-              },
-            );
-          },
-          /*
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          UserAccountsDrawerHeader(
+            accountName:
+                Text("Conectado como: ${userProvider.activeUser.nombre}"),
+            accountEmail: Text("Rol: $rol"),
+          ),
           ListTile(
-            title: Text('Contactar por WhatsApp'),
-            onTap: () async {
-              // Número de teléfono de la peluquería
-              String phoneNumber =
-                  'xxxxxxxxxx'; // Reemplaza xxxxxxxxxx con el número de teléfono real
-
-              // Construir el enlace de WhatsApp
-              String whatsappUrl = 'https://wa.me/$phoneNumber';
-
-              // Lanzar el enlace
-              await launch(whatsappUrl);
-
-              // Cerrar el menú desplegable
-              Navigator.pop(context);
+            title: const Text('Inicio'),
+            leading: Icon(Icons.home),
+            onTap: () {
+              Navigator.pushNamed(context, 'home');
             },
           ),
-          */
-          separatorBuilder: (context, index) => Divider(),
-          itemCount: AppRoutes.menuOptions.length),
+          if (rol == "gerente" || rol == "peluquero")
+            ListTile(
+              title: const Text('Horario'),
+              leading: Icon(Icons.calendar_today),
+              onTap: () {
+                Navigator.pushNamed(context, 'schedule');
+              },
+            ),
+          if (rol == "gerente")
+            ListTile(
+              title: const Text('Gestión de Peluqueros'),
+              leading: Icon(Icons.people),
+              onTap: () {
+                Navigator.pushNamed(context, 'gestion');
+              },
+            ),
+          if (rol == "gerente")
+            ListTile(
+              title: const Text('Calendarios'),
+              leading: Icon(Icons.calendar_today),
+              onTap: () {
+                Navigator.pushNamed(context, 'horario');
+              },
+            ),
+          ListTile(
+            title: const Text('Reservas'),
+            leading: Icon(Icons.calendar_today),
+            onTap: () {
+              Navigator.pushNamed(context, 'reservas');
+            },
+          ),
+          ListTile(
+            title: const Text('Registro'),
+            leading: Icon(Icons.app_registration_outlined),
+            onTap: () {
+              Navigator.pushNamed(context, 'registro');
+            },
+          ),
+          Divider(
+            thickness: 0.5,
+            color: Colors.grey[400],
+          ),
+          ListTile(
+            title: Column(
+              children: [
+                Text("Contacta!"),
+                SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () => enlaceWhatsapp(),
+                      icon: Icon(
+                        Icons.chat,
+                        size: 40,
+                      ),
+                    ),
+                    SizedBox(width: 60),
+                    IconButton(
+                      onPressed: () => enlaceTelefono(),
+                      icon: Icon(
+                        Icons.phone,
+                        size: 40,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
+  }
+}
+
+Future<void> enlaceWhatsapp() async {
+  var _whatsappURL =
+      Uri.parse("https://wa.me/+34678177405?text=${Uri.tryParse("reserva")}");
+  if (!await launchUrl(_whatsappURL)) {
+    throw Exception('Could not launch $_whatsappURL');
+  }
+}
+
+Future<void> enlaceTelefono() async {
+  var _whatsappURL = Uri.parse("tel:+34678177405");
+  if (!await launchUrl(_whatsappURL)) {
+    throw Exception('Could not launch $_whatsappURL');
   }
 }

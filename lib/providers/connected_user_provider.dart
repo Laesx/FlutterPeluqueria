@@ -8,18 +8,19 @@ class ConnectedUserProvider extends ChangeNotifier {
     genero: "",
     id: "test",
     nombre: "Usuario de prueba",
+    apellido: "Apellido",
     rol: "Gerente",
-    telefono: '55555',
+    telefono: "678177405",
     verificado: false,
   );
 
-  String getActiveUserRol() {
+  String? getActiveUserRol() {
     return activeUser.rol;
   }
 
   // Método llamado en login_screen si el login se realiza correctamente
   void setActiveUser(Usuario user) {
-    print(user.email);
+    //print(user.email);
     activeUser = user;
   }
 }
