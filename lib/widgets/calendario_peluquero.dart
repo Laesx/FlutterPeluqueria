@@ -185,7 +185,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
     var endMinute = int.parse(endTime.split(':')[1]);
 
     for (var hour = startHour; hour <= endHour; hour++) {
-      for (var minute = 0; minute < 60; minute += 30) {
+      for (var minute = 0; minute < 60; minute += 15) {
         if (hour == startHour && minute < startMinute ||
             hour == endHour && minute > endMinute) {
           continue;
@@ -302,7 +302,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
                 children: [
                   Wrap(
                     spacing: 20.0,
-                    runSpacing: 60.0,
+                    runSpacing: 20.0,
                     children: [
                       for (int i = 0; i < dia.length; i++) ...[
                         BotonHora(

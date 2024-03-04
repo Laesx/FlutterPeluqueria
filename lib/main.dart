@@ -24,8 +24,9 @@ class MyApp extends StatelessWidget {
       initialRoute:
           AppRoutes.initialRoute, // Utilizar home para realizar pruebas
       routes: AppRoutes.getAppRoutes(),
-      theme: AppTheme.darkTheme,
-      darkTheme: AppTheme.darkTheme, // TODO: Implementar tema oscuro
+      //theme: AppTheme.darkTheme,
+      //darkTheme: AppTheme.darkTheme, // TODO: Implementar tema oscuro
+      debugShowCheckedModeBanner: false,
     );
   }
 }
