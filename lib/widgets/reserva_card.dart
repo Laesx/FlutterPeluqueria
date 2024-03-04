@@ -15,10 +15,8 @@ class ReservaCard extends StatelessWidget {
   double calculateTotal() {
     double total = 0.0;
     for (var service in reserva.servicios.entries) {
-      if (service.value) {
-        // Assuming the service has a price property
-        total += double.tryParse(service.key) ?? 0.0;
-      }
+      // Assuming the service has a price property
+      total += service.value;
     }
     return total;
   }
