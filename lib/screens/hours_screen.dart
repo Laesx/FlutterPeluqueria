@@ -151,35 +151,153 @@ class _OpeningHoursManagerState extends State<OpeningHoursManager> {
     }
   }
 
+  int compareTimeOfDay(TimeOfDay t1, TimeOfDay t2) {
+    final t1InMinutes = t1.hour * 60 + t1.minute;
+    final t2InMinutes = t2.hour * 60 + t2.minute;
+    return t1InMinutes.compareTo(t2InMinutes);
+  }
+
   Future<void> _selectTime(BuildContext context, String day, bool isMorning,
       bool isOpeningTime) async {
-    final TimeOfDay? picked = await showTimePicker(
+    final initialTime = isOpeningTime
+        ? (isMorning
+            ? _morningOpeningTimes[day]!
+            : _afternoonOpeningTimes[day]!)
+        : (isMorning
+            ? _morningClosingTimes[day]!
+            : _afternoonClosingTimes[day]!);
+    int selectedHour = initialTime.hour;
+    int selectedMinute = initialTime.minute;
+
+    await showDialog(
       context: context,
-      initialTime: isOpeningTime
-          ? (isMorning
-              ? _morningOpeningTimes[day]!
-              : _afternoonOpeningTimes[day]!)
-          : (isMorning
-              ? _morningClosingTimes[day]!
-              : _afternoonClosingTimes[day]!),
-    );
-    if (picked != null)
-      setState(() {
-        if (isOpeningTime) {
-          if (isMorning) {
-            _morningOpeningTimes[day] = picked;
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Select a time'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text('Selected time: $selectedHour:$selectedMinute'),
+                  DropdownButton<int>(
+                    value: selectedHour,
+                    items:
+                        List<DropdownMenuItem<int>>.generate(24, (int index) {
+                      return DropdownMenuItem<int>(
+                        value: index,
+                        child: Text(index.toString()),
+                      );
+                    }),
+                    onChanged: (int? value) {
+                      setState(() {
+                        selectedHour = value!;
+                      });
+                    },
+                  ),
+                  DropdownButton<int>(
+                    value: selectedMinute,
+                    items: List<DropdownMenuItem<int>>.generate(4, (int index) {
+                      return DropdownMenuItem<int>(
+                        value: index * 15,
+                        child: Text((index * 15).toString()),
+                      );
+                    }),
+                    onChanged: (int? value) {
+                      setState(() {
+                        selectedMinute = value!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                    child: Text('OK'),
+                    onPressed: () {
+                      TimeOfDay selectedTime =
+                          TimeOfDay(hour: selectedHour, minute: selectedMinute);
+
+                      if (isOpeningTime) {
+                        if (isMorning) {
+                          if (_morningClosingTimes[day] != null &&
+                              compareTimeOfDay(selectedTime,
+                                      _morningClosingTimes[day]!) >=
+                                  0) {
+                            return;
+                          }
+                        } else {
+                          if (_morningClosingTimes[day] != null &&
+                              compareTimeOfDay(selectedTime,
+                                      _morningClosingTimes[day]!) <
+                                  0) {
+                            return;
+                          } else {
+                            if (_afternoonClosingTimes[day] != null &&
+                                compareTimeOfDay(selectedTime,
+                                        _afternoonClosingTimes[day]!) >=
+                                    0) {
+                              return;
+                            }
+                          }
+                        }
+                      } else {
+                        if (isMorning) {
+                          if (_morningOpeningTimes[day] != null &&
+                              compareTimeOfDay(selectedTime,
+                                      _morningOpeningTimes[day]!) <
+                                  0) {
+                            return;
+                          } else {
+                            if (_afternoonOpeningTimes[day] != null &&
+                                compareTimeOfDay(selectedTime,
+                                        _afternoonOpeningTimes[day]!) >=
+                                    0) {
+                              return;
+                            }
+                          }
+                        } else {
+                          if (_afternoonOpeningTimes[day] != null &&
+                              compareTimeOfDay(selectedTime,
+                                      _afternoonOpeningTimes[day]!) <
+                                  0) {
+                            return;
+                          }
+                        }
+                      }
+
+                      Navigator.of(context).pop(TimeOfDay(
+                          hour: selectedHour, minute: selectedMinute));
+                    }),
+              ],
+            );
+          },
+        );
+      },
+    ).then((selectedTime) {
+      if (selectedTime != null)
+        setState(() {
+          if (isOpeningTime) {
+            if (isMorning) {
+              _morningOpeningTimes[day] = selectedTime;
+            } else {
+              _afternoonOpeningTimes[day] = selectedTime;
+            }
           } else {
-            _afternoonOpeningTimes[day] = picked;
+            if (isMorning) {
+              _morningClosingTimes[day] = selectedTime;
+            } else {
+              _afternoonClosingTimes[day] = selectedTime;
+            }
           }
-        } else {
-          if (isMorning) {
-            _morningClosingTimes[day] = picked;
-          } else {
-            _afternoonClosingTimes[day] = picked;
-          }
-        }
-      });
-    Navigator.pop(context);
+        });
+    });
   }
 
   @override
