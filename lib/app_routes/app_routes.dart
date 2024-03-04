@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/screens/gestion_peluqueros.dart';
+import 'package:flutter_peluqueria/services/auth_services.dart';
 
 import '../models/models.dart';
 import '../screens/screens.dart';
 import '../screens/register_screen.dart';
 
 class AppRoutes {
-  static const initialRoute = 'home';
+  static const initialRoute = 'login';
 
   static final menuOptions = <MenuOption>[
     MenuOption(

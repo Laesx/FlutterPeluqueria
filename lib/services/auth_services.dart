@@ -58,4 +58,12 @@ class AuthService extends ChangeNotifier {
       return decodedResp['error']['message'];
     }
   }
+
+  Future<String?> getUserRole() async {
+    final idToken = await storage.read(key: 'idToken');
+    final url = Uri.parse(_baseUrl + '/v1/accounts:lookup');
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $idToken',
+    });
+  }
 }

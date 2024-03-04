@@ -2,23 +2,23 @@ import 'dart:convert';
 
 class Usuario {
   String? id;
-  String email;
-  String genero;
-  String nombre;
-  String apellido;
-  String rol;
-  String telefono;
-  bool verificado;
+  String? email;
+  String? genero;
+  String? nombre;
+  String? apellido;
+  String? rol;
+  String? telefono;
+  bool? verificado;
 
   Usuario({
     this.id,
-    required this.email,
-    required this.genero,
-    required this.nombre,
-    required this.apellido,
-    required this.rol,
-    required this.telefono,
-    required this.verificado,
+    this.email,
+    this.genero,
+    this.nombre,
+    this.apellido,
+    this.rol,
+    this.telefono,
+    this.verificado,
   });
 
   factory Usuario.fromJson(String str) => Usuario.fromMap(json.decode(str));

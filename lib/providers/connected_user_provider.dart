@@ -14,7 +14,7 @@ class ConnectedUserProvider extends ChangeNotifier {
     verificado: false,
   );
 
-  String getActiveUserRol() {
+  String? getActiveUserRol() {
     return activeUser.rol;
   }
 
