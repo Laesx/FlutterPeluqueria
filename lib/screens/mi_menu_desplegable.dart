@@ -12,7 +12,7 @@ class MiMenuDesplegable extends StatelessWidget {
     final userProvider =
         Provider.of<ConnectedUserProvider>(context, listen: false);
     String rol = userProvider.getActiveUserRol()!.toLowerCase();
-    //print(userProvider.activeUser.toJson());
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -100,6 +100,16 @@ class MiMenuDesplegable extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          ListTile(
+            title: const Text('Cerrar sesión'),
+            leading: Icon(Icons.exit_to_app),
+            onTap: () {
+              // Cierra la sesión del usuario y vuelve a la pantalla de inicio de sesión
+              userProvider.logout();
+              Navigator.pushNamedAndRemoveUntil(
+                  context, 'login', (route) => false);
+            },
           ),
         ],
       ),

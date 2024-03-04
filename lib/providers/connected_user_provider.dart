@@ -23,4 +23,6 @@ class ConnectedUserProvider extends ChangeNotifier {
     //print(user.email);
     activeUser = user;
   }
+
+  void logout() {}
 }
