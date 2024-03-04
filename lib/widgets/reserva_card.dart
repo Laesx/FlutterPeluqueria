@@ -115,10 +115,15 @@ class ReservaCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16.0),
-                    const Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Código', style: TextStyle(color: Colors.grey)),
+                          const Text(
+                            'Código Lyoko: ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(reserva.id!,
+                              style: TextStyle(color: Colors.grey)),
                         ]),
                     const SizedBox(height: 16.0),
                     Row(
