@@ -26,15 +26,15 @@ class MiMenuDesplegable extends StatelessWidget {
             title: const Text('Inicio'),
             leading: Icon(Icons.home),
             onTap: () {
-              Navigator.pushReplacementNamed(context, 'home');
+              Navigator.pushNamed(context, 'home');
             },
           ),
-          if (rol == "gerente")
+          if (rol == "gerente" || rol == "peluquero")
             ListTile(
               title: const Text('Horario'),
               leading: Icon(Icons.calendar_today),
               onTap: () {
-                Navigator.pushReplacementNamed(context, 'schedule');
+                Navigator.pushNamed(context, 'schedule');
               },
             ),
           if (rol == "gerente")
@@ -42,7 +42,7 @@ class MiMenuDesplegable extends StatelessWidget {
               title: const Text('Gestión de Peluqueros'),
               leading: Icon(Icons.people),
               onTap: () {
-                Navigator.pushReplacementNamed(context, 'gestion');
+                Navigator.pushNamed(context, 'gestion');
               },
             ),
           if (rol == "gerente")
@@ -50,21 +50,21 @@ class MiMenuDesplegable extends StatelessWidget {
               title: const Text('Calendarios'),
               leading: Icon(Icons.calendar_today),
               onTap: () {
-                Navigator.pushReplacementNamed(context, 'horario');
+                Navigator.pushNamed(context, 'horario');
               },
             ),
           ListTile(
             title: const Text('Reservas'),
             leading: Icon(Icons.calendar_today),
             onTap: () {
-              Navigator.pushReplacementNamed(context, 'reservas');
+              Navigator.pushNamed(context, 'reservas');
             },
           ),
           ListTile(
             title: const Text('Registro'),
             leading: Icon(Icons.app_registration_outlined),
             onTap: () {
-              Navigator.pushReplacementNamed(context, 'registro');
+              Navigator.pushNamed(context, 'registro');
             },
           ),
           Divider(

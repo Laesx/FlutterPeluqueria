@@ -56,11 +56,18 @@ class _CalendarReservationsState extends State<CalendarReservations> {
     reservas.addAll(reservasServices.reservas);
 
     // Comprueba que sea el peluquero activo el que tiene la reserva
-    reservas.removeWhere((reserva) =>
-        reserva.peluquero != usuarioActivo.id ||
-        reserva.fecha[0].day != day.day ||
-        reserva.fecha[0].month != day.month ||
-        reserva.fecha[0].year != day.year);
+    if (usuarioActivo.rol != 'gerente') {
+      reservas.removeWhere((reserva) =>
+          reserva.peluquero != usuarioActivo.id ||
+          reserva.fecha[0].day != day.day ||
+          reserva.fecha[0].month != day.month ||
+          reserva.fecha[0].year != day.year);
+    } else {
+      reservas.removeWhere((reserva) =>
+          reserva.fecha[0].day != day.day ||
+          reserva.fecha[0].month != day.month ||
+          reserva.fecha[0].year != day.year);
+    }
 
     // Ordena la lista de reservas por fecha
     reservas.sort((a, b) => a.fecha[0].compareTo(b.fecha[0]));
