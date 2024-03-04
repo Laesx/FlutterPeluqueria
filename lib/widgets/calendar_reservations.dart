@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_peluqueria/services/reservas_services.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_peluqueria/models/models.dart';
+import 'package:flutter_peluqueria/services/services.dart';
+import 'package:flutter_peluqueria/widgets/widgets.dart';
+import 'package:table_calendar/table_calendar.dart';
+import '../providers/providers.dart';
 import '../utils.dart';
-import 'widgets.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class CalendarReservations extends StatefulWidget {
   const CalendarReservations({super.key});
@@ -13,237 +16,166 @@ class CalendarReservations extends StatefulWidget {
 }
 
 class _CalendarReservationsState extends State<CalendarReservations> {
-  late final ValueNotifier<List<Event>> _selectedEvents;
-  CalendarFormat _calendarFormat = CalendarFormat.week;
-  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode
-      .toggledOff; // Can be toggled on/off by longpressing a date
+  late ValueNotifier<List<Reserva>> _selectedSchedule;
+  final CalendarFormat _calendarFormat = CalendarFormat.week;
+  final RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.disabled;
+
+  late ReservasServices reservasServices;
+  late HorariosServices horariosServices;
+  late Usuario usuarioActivo;
 
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  DateTime? _rangeStart;
-  DateTime? _rangeEnd;
-
-  late ReservasServices reservasServices;
 
   @override
   void initState() {
     super.initState();
-
     _selectedDay = _focusedDay;
-    _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    reservasServices = Provider.of<ReservasServices>(context);
+    horariosServices = Provider.of<HorariosServices>(context);
+
+    usuarioActivo = Provider.of<ConnectedUserProvider>(context).activeUser;
+    _selectedSchedule = ValueNotifier(_getReservasPorDia(_selectedDay!));
   }
 
   @override
   void dispose() {
-    _selectedEvents.dispose();
+    _selectedSchedule.dispose();
     super.dispose();
   }
 
-  List<Event> _getEventsForDay(DateTime day) {
-    // Implementation example
-    return kEvents[day] ?? [];
-    //return ReservasServices().getReservasByDate(day);
+  // Devuelve una lista con todas las reservas que tiene el peluquero activo en un día concreto
+  List<Reserva> _getReservasPorDia(DateTime day) {
+    List<Reserva> reservas = [];
+    // Copia de las reservas para debuggear
+    reservas.addAll(reservasServices.reservas);
+
+    // Comprueba que sea el peluquero activo el que tiene la reserva
+    reservas.removeWhere((reserva) =>
+        reserva.peluquero != usuarioActivo.id ||
+        reserva.fecha[0].day != day.day ||
+        reserva.fecha[0].month != day.month ||
+        reserva.fecha[0].year != day.year);
+
+    return reservas;
   }
 
-/*
-  Future<List<Event>> _getEventsForDay(DateTime day) async {
-    // Obtener las reservas para el día seleccionado
-    List<Reserva> reservas = await ReservasServices().getReservasByDate(day);
-
-    // Convertir las reservas en eventos
-    List<Event> eventos = reservas.map((reserva) {
-      // Aquí debes definir cómo convertir cada reserva en un evento
-      // Por ejemplo:
-      return Event("Cita ${reserva.fecha}");
-    }).toList();
-
-    return eventos;
-  }
-  */
-
-  List<Event> _getEventsForRange(DateTime start, DateTime end) {
-    // Implementation example
-    final days = daysInRange(start, end);
-
-    return [
-      for (final d in days) ..._getEventsForDay(d),
-    ];
-  }
-
+  // Esta función es lo que ejecutará el calendario al seleccionar un día
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
-        _rangeStart = null; // Important to clean those
-        _rangeEnd = null;
-        _rangeSelectionMode = RangeSelectionMode.toggledOff;
       });
-
-      _selectedEvents.value = _getEventsForDay(selectedDay);
+      _selectedSchedule.value = _getReservasPorDia(_selectedDay!);
+      // Limpia la selección de hora al cambiar de día
+      lastSelection = null;
     }
   }
 
-  void _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
-    setState(() {
-      _selectedDay = null;
-      _focusedDay = focusedDay;
-      _rangeStart = start;
-      _rangeEnd = end;
-      _rangeSelectionMode = RangeSelectionMode.toggledOn;
-    });
-
-    // `start` or `end` could be null
-    if (start != null && end != null) {
-      _selectedEvents.value = _getEventsForRange(start, end);
-    } else if (start != null) {
-      _selectedEvents.value = _getEventsForDay(start);
-    } else if (end != null) {
-      _selectedEvents.value = _getEventsForDay(end);
-    }
-  }
-/*
-  void _mostrarTarjeta(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: ReservaCard(
-            reserva: Reserva(
-              cancelada: true,
-              fecha: [DateTime.now()],
-              pagada: true,
-              pago: 'Tarjeta de crédito',
-              peluquero: 'Nombre del peluquero',
-              servicios: {
-                'Servicio 1': true,
-                'Servicio 2': true,
-                // Agrega los servicios que desees mostrar
-              },
-              usuario: 'Nombre del usuario',
-            ),
-          ),
-        );
-      },
-    );
-  }
-*/
-/*
-  void _mostrarTarjeta(BuildContext context) {
-    String jsonReserva = '''
-  {
-    "cancelada": false,
-    "fecha": ["2024-09-02T17:30:00.000Z"],
-    "pagada": true,
-    "pago": "tarjeta",
-    "peluquero": "test",
-    "servicios": {
-      "SER001": "20",
-      "SER002": "12"
-    },
-    "usuario": "USR0012"
-  }
-''';
-
-    Reserva reserva = Reserva.fromJson(jsonReserva);
-
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: ReservaCard(
-            reserva: reserva,
-          ),
-        );
-      },
-    );
-  }
-*/
-
-  void _mostrarTarjeta(BuildContext context) async {
-    // Obtener las reservas para la fecha seleccionada
-    List<Reserva> reservas = await ReservasServices().loadReservas();
-
-    if (reservas.isNotEmpty) {
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return Container(
-            padding: const EdgeInsets.all(16.0),
-            child: ReservaCard(
-              reserva: reservas[1],
-            ),
-          );
-        },
-      );
-    }
-  }
+  // Variable que guardará la ultima hora que se ha seleccionado
+  int? lastSelection;
 
   @override
   Widget build(BuildContext context) {
+    // Esta función maneja cuando se selecciona una hora
+    onTimePressed(timeSelected) {
+      //print(timeSelected.toString());
+      //print(lastSelection);
+      setState(() {
+        if (lastSelection == timeSelected) {
+          lastSelection = null;
+        } else {
+          lastSelection = timeSelected;
+        }
+      });
+      //print(lastSelection);
+    }
+
     return Column(
       children: [
-        TableCalendar<Event>(
+        TableCalendar<Reserva>(
           locale: 'es_ES',
           firstDay: kFirstDay,
           lastDay: kLastDay,
           focusedDay: _focusedDay,
           selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-          rangeStartDay: _rangeStart,
-          rangeEndDay: _rangeEnd,
           calendarFormat: _calendarFormat,
           availableCalendarFormats: const {CalendarFormat.week: 'Week'},
           rangeSelectionMode: _rangeSelectionMode,
-          eventLoader: _getEventsForDay,
           startingDayOfWeek: StartingDayOfWeek.monday,
           calendarStyle: const CalendarStyle(
-            // Use `CalendarStyle` to customize the UI
             outsideDaysVisible: false,
           ),
+          headerStyle: const HeaderStyle(
+            titleCentered: true,
+          ),
           onDaySelected: _onDaySelected,
-          onRangeSelected: _onRangeSelected,
-          onFormatChanged: (format) {
-            if (_calendarFormat != format) {
-              setState(() {
-                _calendarFormat = format;
-              });
-            }
-          },
           onPageChanged: (focusedDay) {
             _focusedDay = focusedDay;
           },
         ),
-        const SizedBox(height: 8.0),
-        Expanded(
-          child: ValueListenableBuilder<List<Event>>(
-            valueListenable: _selectedEvents,
-            builder: (context, reserva, _) {
-              return ListView.builder(
-                itemCount: reserva.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 12.0,
-                      vertical: 4.0,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(),
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    child: ListTile(
-                      onTap: () {
-                        print('${reserva[index]}');
-                        _mostrarTarjeta(context);
-                      },
-                      title: Text('${reserva[index]}'),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+        const SizedBox(height: 20.0),
+        ValueListenableBuilder<List<Reserva>>(
+          valueListenable: _selectedSchedule,
+          builder: (context, reserva, _) {
+            if (reserva.isEmpty) {
+              return Container(
+                  padding: const EdgeInsets.all(30.0),
+                  decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 15,
+                          offset: Offset(0, 5),
+                        )
+                      ]),
+                  child: const Text(
+                    'Hoy no hay reservas',
+                    style: TextStyle(color: Colors.white, fontSize: 20.0),
+                  ));
+            }
+            return Expanded(
+                child: ListView.builder(
+              itemCount: reserva.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 12.0,
+                    vertical: 4.0,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: ListTile(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Container(
+                            padding: const EdgeInsets.all(16.0),
+                            child: ReservaCard(
+                              reserva: reserva[index],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    title: Text(
+                        "Cita ${DateFormat('dd-MM-yyyy').format(reserva[index].fecha[0])}, ${DateFormat('HH:mm').format(reserva[index].fecha[0])}"),
+                  ),
+                );
+              },
+            ));
+          },
         ),
       ],
     );

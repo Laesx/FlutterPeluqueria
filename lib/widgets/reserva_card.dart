@@ -3,8 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:flutter_peluqueria/models/models.dart';
 
 class ReservaCard extends StatelessWidget {
-  final String nombrePeluqueria = "Nombre peluqueria ejemplo";
-  final String direccionPeluqueria = "Direccion ejemplo";
+  final String nombrePeluqueria = "Barbershop Ali";
+  final String direccionPeluqueria = "C. Primavera, 26, Genil, 18008 Granada";
   final Reserva reserva;
 
   const ReservaCard({
