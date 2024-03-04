@@ -319,7 +319,7 @@ class _CalendarioPeluqueroState extends State<CalendarioPeluquero> {
                 children: [
                   Wrap(
                     spacing: 20.0,
-                    runSpacing: 20.0,
+                    runSpacing: 15.0,
                     children: [
                       for (int i = 0; i < dia.length; i++) ...[
                         BotonHora(
