@@ -20,7 +20,7 @@ class ConnectedUserProvider extends ChangeNotifier {
 
   // Método llamado en login_screen si el login se realiza correctamente
   void setActiveUser(Usuario user) {
-    print(user.email);
+    //print(user.email);
     activeUser = user;
   }
 }

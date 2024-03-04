@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_peluqueria/app_routes/app_routes.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../providers/providers.dart';
 
 class MiMenuDesplegable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final userProvider =
+        Provider.of<ConnectedUserProvider>(context, listen: false);
     return Drawer(
       child: ListView.separated(
         itemBuilder: (context, index) {
