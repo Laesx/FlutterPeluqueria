@@ -62,6 +62,9 @@ class _CalendarReservationsState extends State<CalendarReservations> {
         reserva.fecha[0].month != day.month ||
         reserva.fecha[0].year != day.year);
 
+    // Ordena la lista de reservas por fecha
+    reservas.sort((a, b) => a.fecha[0].compareTo(b.fecha[0]));
+
     return reservas;
   }
 
@@ -99,7 +102,7 @@ class _CalendarReservationsState extends State<CalendarReservations> {
 
     return Column(
       children: [
-        TableCalendar<Reserva>(
+        TableCalendar(
           locale: 'es_ES',
           firstDay: kFirstDay,
           lastDay: kLastDay,
@@ -119,12 +122,39 @@ class _CalendarReservationsState extends State<CalendarReservations> {
           onPageChanged: (focusedDay) {
             _focusedDay = focusedDay;
           },
+          calendarBuilders: CalendarBuilders(
+            defaultBuilder: (context, day, _) {
+              final eventos = _getReservasPorDia(day);
+              if (eventos.isNotEmpty) {
+                return Container(
+                  margin: const EdgeInsets.all(4.0),
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: Colors
+                        .red, // Cambia el color del fondo del día que tiene eventos
+                    shape: BoxShape
+                        .circle, // Cambia la forma del fondo del día que tiene eventos
+                  ),
+                  child: Text(
+                    day.day
+                        .toString(), // Puedes mostrar el número del día o cualquier otro texto
+                    style: const TextStyle(
+                      color: Colors
+                          .white, // Cambia el color del texto del día que tiene eventos
+                    ),
+                  ),
+                );
+              } else {
+                return null; // Devuelve null para usar el constructor de día predeterminado para los días sin eventos
+              }
+            },
+          ),
         ),
         const SizedBox(height: 20.0),
         ValueListenableBuilder<List<Reserva>>(
           valueListenable: _selectedSchedule,
-          builder: (context, reserva, _) {
-            if (reserva.isEmpty) {
+          builder: (context, reservas, _) {
+            if (reservas.isEmpty) {
               return Container(
                   padding: const EdgeInsets.all(30.0),
                   decoration: BoxDecoration(
@@ -144,7 +174,7 @@ class _CalendarReservationsState extends State<CalendarReservations> {
             }
             return Expanded(
                 child: ListView.builder(
-              itemCount: reserva.length,
+              itemCount: reservas.length,
               itemBuilder: (context, index) {
                 return Container(
                   margin: const EdgeInsets.symmetric(
@@ -163,14 +193,14 @@ class _CalendarReservationsState extends State<CalendarReservations> {
                           return Container(
                             padding: const EdgeInsets.all(16.0),
                             child: ReservaCard(
-                              reserva: reserva[index],
+                              reserva: reservas[index],
                             ),
                           );
                         },
                       );
                     },
                     title: Text(
-                        "Cita ${DateFormat('dd-MM-yyyy').format(reserva[index].fecha[0])}, ${DateFormat('HH:mm').format(reserva[index].fecha[0])}"),
+                        "Cita ${DateFormat('dd-MM-yyyy').format(reservas[index].fecha[0])}, ${DateFormat('HH:mm').format(reservas[index].fecha[0])}"),
                   ),
                 );
               },

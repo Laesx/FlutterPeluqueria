@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_peluqueria/widgets/calendar_reservations_test.dart';
 import 'package:flutter_peluqueria/widgets/widgets.dart';
 
 class ReservasScreen extends StatelessWidget {
