@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 class Usuario {
+  String? id;
   String email;
   String genero;
-  String? id;
   String nombre;
   String? apellido;
   String rol;
@@ -11,27 +11,21 @@ class Usuario {
   bool verificado;
 
   Usuario({
+    this.id,
     required this.email,
     required this.genero,
-    this.id,
     required this.nombre,
     this.apellido,
     required this.rol,
     required this.telefono,
-    this.horaInicial,
-    this.horaFin,
     required this.verificado,
   });
 
-  factory Usuario.fromRawJson(String str) => Usuario.fromJson(json.decode(str));
+  factory Usuario.fromJson(String str) => Usuario.fromMap(json.decode(str));
 
-  get horaInicialLunes => null;
+  String toJson() => json.encode(toMap());
 
-  get horaFinLunes => null;
-
-  String toRawJson() => json.encode(toJson());
-
-  factory Usuario.fromJson(Map<String, dynamic> json) => Usuario(
+  factory Usuario.fromMap(Map<String, dynamic> json) => Usuario(
         email: json["email"],
         genero: json["genero"],
         nombre: json["nombre"],
@@ -41,15 +35,13 @@ class Usuario {
         verificado: json["verificado"],
       );
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toMap() => {
         "email": email,
         "genero": genero,
         "nombre": nombre,
         "apellido": apellido,
         "rol": rol,
         "telefono": telefono,
-        "horaentrada": horaInicial,
-        "horasalida": horaFin,
         "verificado": verificado,
       };
 

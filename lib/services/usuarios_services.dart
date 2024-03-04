@@ -14,24 +14,22 @@ class UsuariosServices extends ChangeNotifier {
   bool isSaving = false;
 
   UsuariosServices() {
-    loadUsuarios();
+    _loadUsuarios();
   }
 
   // TODO Falta Probar
-  Future<List<Usuario>> loadUsuarios() async {
+  Future<List<Usuario>> _loadUsuarios() async {
     notifyListeners();
 
     final url = Uri.https(_baseURL, 'usuarios.json', {'auth': _firebaseToken});
     final resp = await http.get(url);
-
-    //print(resp.body);
-
     final Map<String, dynamic> usuariosMap = json.decode(resp.body);
 
+    // TODO: Esto a lo mejor da error luego con algo de Paula o Ridu, hay que probarlo bien
     this.usuarios.clear();
 
     usuariosMap.forEach((key, value) {
-      print("Key: $key, Value: $value");
+      //print("Key: $key, Value: $value");
       final Usuario tempUser = Usuario.fromMap(value);
       tempUser.id = key;
       usuarios.add(tempUser);
@@ -66,7 +64,7 @@ class UsuariosServices extends ChangeNotifier {
   }
 
   Future<Usuario?> getUsuarioByEmail(String email) async {
-    List<Usuario> users = await loadUsuarios();
+    List<Usuario> users = await _loadUsuarios();
     var filteredUsers = users.where((u) => u.email == email);
     if (filteredUsers.isNotEmpty) {
       return filteredUsers.first;

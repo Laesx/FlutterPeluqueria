@@ -12,10 +12,9 @@ class UsuarioWidget extends StatelessWidget {
       margin: EdgeInsets.all(8.0),
       child: ListTile(
         title: Text(usuario.nombre),
-        subtitle: Text('Email: ${usuario.email}\nTeléfono: ${usuario.telefono}'),
-        trailing: usuario.rol == 'peluquero'
-            ? Icon(Icons.cut) 
-            : null,
+        subtitle:
+            Text('Email: ${usuario.email}\nTeléfono: ${usuario.telefono}'),
+        trailing: usuario.rol == 'peluquero' ? Icon(Icons.cut) : null,
         onTap: () {
           _mostrarDetallesUsuario(context, usuario);
         },

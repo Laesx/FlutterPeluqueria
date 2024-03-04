@@ -4,6 +4,8 @@ import 'package:flutter_peluqueria/services/usuarios_services.dart';
 import 'package:flutter_peluqueria/widgets/usuario.dart';
 import 'package:provider/provider.dart';
 
+import 'screens.dart';
+
 class GestionPeluquerosScreen extends StatefulWidget {
   @override
   _GestionPeluquerosScreenState createState() =>
@@ -27,12 +29,12 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
     usuariosService = Provider.of<UsuariosServices>(context);
   }
 
-  // Esto me parece que no vamos a tener que usarlo, pongo esto para avisar
+  // Esto hay que borrarlo
   Future<void> _loadUsuarios() async {
     try {
-      List<Usuario> loadedUsuarios = await UsuariosServices().loadUsuarios();
+      //List<Usuario> loadedUsuarios = await UsuariosServices().loadUsuarios();
       setState(() {
-        usuarios = loadedUsuarios;
+        //usuarios = loadedUsuarios;
       });
     } catch (error) {
       // Manejar cualquier error que pueda ocurrir durante la carga de usuarios
@@ -43,6 +45,7 @@ class _GestionPeluquerosScreenState extends State<GestionPeluquerosScreen> {
   @override
   Widget build(BuildContext context) {
     usuarios.addAll(usuariosService.usuarios); // Accede a la lista de usuarios
+    print(usuariosService.usuarios);
     print("lista, $usuarios");
 
     return Scaffold(
