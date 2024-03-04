@@ -22,7 +22,7 @@ class AppRoutes {
         route: 'gestion',
         icon: Icons.people,
         name: 'Gestión',
-        screen: GestionPeluquerosScreen()),
+        screen:  GestionPeluquerosScreen()),
   ];
 
   static Map<String, Widget Function(BuildContext)> getAppRoutes() {

@@ -1,53 +1,57 @@
 import 'dart:convert';
 
 class Usuario {
-  String? id;
   String email;
   String genero;
+  String? id;
   String nombre;
   String rol;
-  int telefono;
-  bool verificado;
+  String telefono;
+  String? horaInicial;
+  String? horaFin;
+  bool verificado = false;
 
   Usuario({
-    this.id,
     required this.email,
     required this.genero,
+    this.id,
     required this.nombre,
     required this.rol,
     required this.telefono,
+    this.horaInicial,
+    this.horaFin,
     required this.verificado,
   });
 
-  factory Usuario.fromJson(String str) => Usuario.fromMap(json.decode(str));
+  factory Usuario.fromRawJson(String str) => Usuario.fromJson(json.decode(str));
 
-  String toJson() => json.encode(toMap());
+  get horaInicialLunes => null;
 
-  factory Usuario.fromMap(Map<String, dynamic> json) => Usuario(
+  get horaFinLunes => null;
+
+  String toRawJson() => json.encode(toJson());
+
+  factory Usuario.fromJson(Map<String, dynamic> json) => Usuario(
         email: json["email"],
         genero: json["genero"],
         nombre: json["nombre"],
         rol: json["rol"],
         telefono: json["telefono"],
+        horaInicial: json["horaentrada"],
+        horaFin: json["horasalida"],
         verificado: json["verificado"],
       );
 
-  Map<String, dynamic> toMap() => {
+  Map<String, dynamic> toJson() => {
         "email": email,
         "genero": genero,
         "nombre": nombre,
         "rol": rol,
         "telefono": telefono,
+        "horaentrada": horaInicial,
+        "horasalida": horaFin,
         "verificado": verificado,
       };
 
-  Usuario copy() => Usuario(
-        id: this.id,
-        email: this.email,
-        genero: this.genero,
-        nombre: this.nombre,
-        rol: this.rol,
-        telefono: this.telefono,
-        verificado: this.verificado,
-      );
+  static fromMap(value) {}
 }
