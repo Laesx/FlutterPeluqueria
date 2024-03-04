@@ -119,7 +119,7 @@ class ReservaCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            'Código Lyoko: ',
+                            'Código: ',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Text(reserva.id!,
